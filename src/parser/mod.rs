@@ -93,6 +93,7 @@ impl Parser {
                         self.advance();
                         Ok(Node::Number(Box::new(number_node)))
                     },
+
                     // if it is a unary operator (negation or positive), return a UnaryOpNode
                     TokenType::Plus | TokenType::Minus => {
                         let unary_op = self.current_token.unwrap();
@@ -100,7 +101,33 @@ impl Parser {
                         let factor = self.gr_factor()?;
                         let unary_op_node = UnaryOpNode::new(unary_op, factor);
                         Ok(Node::UnaryOpNode(Box::new(unary_op_node)))
+                    },
+
+                    // if it is a left parenthesis, return a nested expression
+                    TokenType::LeftParen => {
+                        self.advance();
+                        let expr = self.gr_expr()?;
+                        match self.current_token {
+                            Some(token) => {
+                                if token.value == TokenType::RightParen {
+                                    self.advance();
+                                    Ok(expr)
+                                } else {
+                                    Err(Error::new_parser_error(
+                                        format!("Expected ')', got {:?}", token.value),
+                                        &token.position,
+                                    ))
+                                }
+                            }
+                            None => {
+                                Err(Error::new_parser_error(
+                                    "Expected right parenthesis".to_string(),
+                                    &token.position,
+                                ))
+                            }
+                        }
                     }
+
                     _ => Err(Error::new_parser_error(
                         format!("Expected number, found {:?}", token.value),
                         &token.position,
