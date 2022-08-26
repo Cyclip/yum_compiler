@@ -12,89 +12,115 @@ const DIGITS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 pub struct Lexer {
     // text to process
     text: String,
-    pos: usize,
-    current_char: Option<char>,
+    position: LexerPosition,
+}
+
+/// Represents a position within a lexer
+#[derive(Debug, Clone)]
+pub struct LexerPosition {
+    pub line: u32,
+    pub column: u32,
+    pub pos: usize,
+    pub current_char: Option<char>,
+    text: String,
+}
+
+impl LexerPosition {
+    pub fn new(text: &String) -> LexerPosition {
+        let current_char = text.chars().nth(0);
+        LexerPosition {
+            line: 1,
+            column: 1,
+            pos: 0,
+            current_char,
+            text: text.clone(),
+        }
+    }
+
+    pub fn advance(&mut self) {
+        self.pos += 1;
+        self.column += 1;
+        self.current_char = self.text.chars().nth(self.pos);
+    }
 }
 
 impl Lexer {
     pub fn new(text: String) -> Lexer {
-        let current_char = text.chars().nth(0);
+        let position = LexerPosition::new(&text);
         Lexer {
             text,
-            pos: 0,
-            current_char,
+            position,
         }
-    }
-
-    fn advance(&mut self) {
-        self.pos += 1;
-        self.current_char = self.text.chars().nth(self.pos);
-        println!("Advancing to pos: {}, char: {:?}", self.pos, self.current_char);
     }
 
     pub fn make_tokens(&mut self) -> Result<Vec<Token>, Error> {
         let mut tokens: Vec<Token> = Vec::new();
 
-        while let Some(current_char) = self.current_char {
+        while let Some(current_char) = self.position.current_char {
             println!("Current char: '{}'", current_char);
             // ignore whitespace
             if current_char.is_whitespace() {
-                self.advance();
+                self.position.advance();
                 continue;
             }
 
             // check for single-character tokens
             match current_char {
                 '(' => {
-                    tokens.push(Token::new(TokenType::LeftParen));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::LeftParen, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 ')' => {
-                    tokens.push(Token::new(TokenType::RightParen));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::RightParen, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '{' => {
-                    tokens.push(Token::new(TokenType::LeftBrace));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::LeftBrace, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '}' => {
-                    tokens.push(Token::new(TokenType::RightBrace));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::RightBrace, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 ',' => {
-                    tokens.push(Token::new(TokenType::Comma));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Comma, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '.' => {
-                    tokens.push(Token::new(TokenType::Dot));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Dot, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '-' => {
-                    tokens.push(Token::new(TokenType::Minus));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Minus, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '+' => {
-                    tokens.push(Token::new(TokenType::Plus));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Plus, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 ';' => {
-                    tokens.push(Token::new(TokenType::Semicolon));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Semicolon, &self.position));
+                    self.position.advance();
                     continue;
                 },
                 '*' => {
-                    tokens.push(Token::new(TokenType::Star));
-                    self.advance();
+                    tokens.push(Token::new(TokenType::Star, &self.position));
+                    self.position.advance();
                     continue;
                 },
+                '/' => {
+                    tokens.push(Token::new(TokenType::Slash, &self.position));
+                    self.position.advance();
+                    continue;
+                }
                 _ => (),
             };
             
@@ -112,8 +138,7 @@ impl Lexer {
             return Err(Error::new(
                 ErrorType::InvalidToken,
                 format!("Unexpected character: '{}'", current_char),
-                self.pos,
-                &self.text,
+                &self.position
             ));
         }
 
@@ -124,31 +149,30 @@ impl Lexer {
         let mut number = String::new();
         let mut dot_count = 0;
 
-        while let Some(current_char) = self.current_char {
+        while let Some(current_char) = self.position.current_char {
             if self.is_digit(current_char) {
                 number.push(current_char);
-                self.advance();
+                self.position.advance();
             } else if current_char == '.' {
                 if dot_count > 0 {
                     return Err(Error::new(
                         ErrorType::SyntaxError,
                         "Number cannot have more than one decimal point".to_string(),
-                        self.pos,
-                        &self.text,
+                        &self.position
                     ));
                 }
                 dot_count += 1;
                 number.push(current_char);
-                self.advance();
+                self.position.advance();
             } else {
                 break;
             }
         }
 
         if dot_count == 0 {
-            Ok(Token::new(TokenType::Integer(number.parse::<u32>().unwrap())))
+            Ok(Token::new(TokenType::Integer(number.parse::<u32>().unwrap()), &self.position))
         } else {
-            Ok(Token::new(TokenType::Float(number.parse::<f32>().unwrap())))
+            Ok(Token::new(TokenType::Float(number.parse::<f32>().unwrap()), &self.position))
         }
     }
 

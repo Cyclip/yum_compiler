@@ -1,55 +1,43 @@
 use std::fmt::Display;
 
+use crate::lexer::LexerPosition;
+use crate::lexer::tokens::TokenPosition;
+
 /// Represents an error
 #[derive(Debug)]
 pub struct Error {
     pub error_type: ErrorType,
     pub error_message: String,
-    pub error_line: u32,
-    pub error_column: u32,
+    pub position: TokenPosition,
 }
 
 #[derive(Debug)]
 pub enum ErrorType {
     SyntaxError,
     InvalidToken,
+    ParserError,
 }
 
 impl Error {
-    pub fn new(error_type: ErrorType, error_message: String, position: usize, source: &String) -> Error {
-        let (error_line, error_column) = Error::get_char_position(position, source);
-
+    pub fn new(error_type: ErrorType, error_message: String, position: &LexerPosition) -> Error {
         Error {
             error_type,
             error_message,
-            error_line,
-            error_column,
+            position: TokenPosition::from(position),
         }
     }
 
-    fn get_char_position(position: usize, source: &String) -> (u32, u32) {
-        let mut line = 1;
-        let mut column = 0;
-
-        for (i, c) in source.chars().enumerate() {
-            column += 1;
-
-            if c == '\n' {
-                column = 0;
-                line += 1;
-            }
-
-            if i == position {
-                break
-            }
+    pub fn new_parser_error(error_message: String, position: &TokenPosition) -> Error {
+        Error {
+            error_type: ErrorType::ParserError,
+            error_message,
+            position: position.clone(),
         }
-
-        (line, column)
     }
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}: {} at line {}, column {}", self.error_type, self.error_message, self.error_line, self.error_column)
+        write!(f, "{:?}: {} at line {}, column {}", self.error_type, self.error_message, self.position.line, self.position.column)
     }
 }
