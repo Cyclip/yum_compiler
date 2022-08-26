@@ -142,6 +142,8 @@ impl Lexer {
             ));
         }
 
+        tokens.push(Token::new(TokenType::EOF, &self.position));
+
         Ok(tokens)
     }
 

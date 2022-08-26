@@ -5,12 +5,20 @@ use crate::lexer::tokens::Token;
 pub enum Node {
     Number(Box<NumberNode>),
     BinOp(Box<BinOpNode>),
+    UnaryOpNode(Box<UnaryOpNode>),
 }
 
 /// Number (int/float) node
 #[derive(Debug)]
 pub struct NumberNode {
     token: Token,
+}
+
+/// Unary operation node
+#[derive(Debug)]
+pub struct UnaryOpNode {
+    token: Token,
+    right: Node,
 }
 
 /// Binary operation node
@@ -33,6 +41,15 @@ impl BinOpNode {
             left_node,
             op_token,
             right_node,
+        }
+    }
+}
+
+impl UnaryOpNode {
+    pub fn new(token: Token, right: Node) -> UnaryOpNode {
+        UnaryOpNode {
+            token,
+            right: right,
         }
     }
 }

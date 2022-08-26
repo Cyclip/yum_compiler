@@ -32,6 +32,9 @@ pub enum TokenType {
     LongInteger(u64),
     Float(f32),
     Double(f64),
+
+    // End of File
+    EOF
 }
 
 impl Token {

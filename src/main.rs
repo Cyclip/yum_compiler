@@ -2,9 +2,17 @@ pub mod lexer;
 pub mod errors;
 pub mod parser;
 
+use std::env;
+
 fn main() {
+    let args: Vec<String> = env::args()
+        .skip(1)
+        .collect();
+    
+    let expression = args.join(" ");
+
     // Generate tokens from input
-    let mut lexer = lexer::Lexer::new(String::from("3 * 3 * 5"));
+    let mut lexer = lexer::Lexer::new(expression);
     let tokens = lexer.make_tokens().unwrap();
     println!("Tokenized: {:#?}", tokens);
 

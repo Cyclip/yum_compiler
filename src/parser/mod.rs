@@ -1,6 +1,6 @@
 mod nodes;
 
-use nodes::{Node, NumberNode, BinOpNode};
+use nodes::{Node, NumberNode, BinOpNode, UnaryOpNode};
 use crate::lexer::tokens::{Token, TokenType};
 use crate::errors::{Error, ErrorType};
 
@@ -28,7 +28,19 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Node, Error> {
-        self.gr_expr()
+        let res = self.gr_expr();
+
+        if match self.current_token {
+            Some(token) => token.value != TokenType::EOF,
+            None => true,
+        } {
+            return Err(Error::new_parser_error(
+                "Expected EOF".to_string(),
+                &self.current_token.unwrap().position,
+            ));
+        } else {
+            return res;
+        }
     }
 
     /// Attempt to get a token at a given index
@@ -80,6 +92,14 @@ impl Parser {
                         let number_node = NumberNode::new(token);
                         self.advance();
                         Ok(Node::Number(Box::new(number_node)))
+                    },
+                    // if it is a unary operator (negation or positive), return a UnaryOpNode
+                    TokenType::Plus | TokenType::Minus => {
+                        let unary_op = self.current_token.unwrap();
+                        self.advance();
+                        let factor = self.gr_factor()?;
+                        let unary_op_node = UnaryOpNode::new(unary_op, factor);
+                        Ok(Node::UnaryOpNode(Box::new(unary_op_node)))
                     }
                     _ => Err(Error::new_parser_error(
                         format!("Expected number, found {:?}", token.value),
