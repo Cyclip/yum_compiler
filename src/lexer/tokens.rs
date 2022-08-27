@@ -1,7 +1,9 @@
+//! Determines available tokens to be parsed
+
 use crate::lexer::LexerPosition;
 
 /// Represents a single token
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub r#value: TokenType,
     pub position: TokenPosition,
@@ -15,7 +17,7 @@ pub struct TokenPosition {
 }
 
 /// Enum for differnt token types
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
     // Single-character tokens
     LeftParen, RightParen, LeftBrace, RightBrace,       // ( ) { }
@@ -28,13 +30,29 @@ pub enum TokenType {
     Less, LessEqual,                                    // < <=
 
     // Number literals
-    Integer(u32),
-    LongInteger(u64),
-    Float(f32),
-    Double(f64),
+    Integer(i32),                                       // 12345
+    Float(f32),                                         // 123.45
+
+    // Identifiers and keywords
+    Identifier(String),                                 // my_identifier
+    Keyword(Keyword),                                   // Any keyword
 
     // End of File
     EOF
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Keyword {
+    Let,
+}
+
+impl Keyword {
+    pub fn from(s: &str) -> Option<Keyword> {
+        match s {
+            "let" => Some(Keyword::Let),
+            _ => None,
+        }
+    }
 }
 
 impl Token {

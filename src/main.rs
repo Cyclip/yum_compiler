@@ -4,6 +4,15 @@ pub mod parser;
 
 use std::env;
 
+fn compile(source: &str) -> Result<(), errors::Error> {
+    let mut lexer = lexer::Lexer::new(source.to_string());
+    let tokens = lexer.make_tokens()?;
+    let mut parser = parser::Parser::new(tokens);
+    let ast = parser.parse()?;
+    println!("{:#?}", ast);
+    Ok(())
+}
+
 fn main() {
     let args: Vec<String> = env::args()
         .skip(1)
@@ -11,13 +20,8 @@ fn main() {
     
     let expression = args.join(" ");
 
-    // Generate tokens from input
-    let mut lexer = lexer::Lexer::new(expression);
-    let tokens = lexer.make_tokens().unwrap();
-    println!("Tokenized: {:#?}", tokens);
-
-    // Generate AST from tokens
-    let mut parser = parser::Parser::new(tokens);
-    let ast = parser.parse().unwrap();
-    println!("AST: {:#?}", ast);
+    match compile(&expression) {
+        Ok(_) => (),
+        Err(e) => println!("{}", e),
+    };
 }

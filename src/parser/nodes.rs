@@ -1,13 +1,21 @@
-use crate::lexer::tokens::Token;
+//! Different nodes within the AST to be interpreted
 
+use crate::{
+    lexer::{tokens::{Token, TokenType}, LexerPosition}, 
+};
+
+// ======================== Base Node Enum ========================
 /// Different parser nodes
 #[derive(Debug)]
 pub enum Node {
     Number(Box<NumberNode>),
     BinOp(Box<BinOpNode>),
     UnaryOpNode(Box<UnaryOpNode>),
+    VarAssignmentNode(Box<VarAssignmentNode>),
+    VarAccessNode(Box<VarAccessNode>),
 }
 
+// =========================== All nodes ===========================
 /// Number (int/float) node
 #[derive(Debug)]
 pub struct NumberNode {
@@ -29,6 +37,20 @@ pub struct BinOpNode {
     right_node: Node,
 }
 
+/// Variable assignment node
+#[derive(Debug)]
+pub struct VarAssignmentNode {
+    identifier: Token,
+    value: Node,
+}
+
+/// Variable assignment node
+#[derive(Debug)]
+pub struct VarAccessNode {
+    identifier: Token,
+}
+
+// =========================== Node impl ===========================
 impl NumberNode {
     pub fn new(token: Token) -> NumberNode {
         NumberNode { token }
@@ -51,5 +73,20 @@ impl UnaryOpNode {
             token,
             right: right,
         }
+    }
+}
+
+impl VarAssignmentNode {
+    pub fn new(identifier: Token, value: Node) -> VarAssignmentNode {
+        VarAssignmentNode {
+            identifier,
+            value,
+        }
+    }
+}
+
+impl VarAccessNode {
+    pub fn new(identifier: Token) -> VarAccessNode {
+        VarAccessNode { identifier }
     }
 }

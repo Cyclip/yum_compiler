@@ -1,5 +1,0 @@
-expr    ::= term (('+' | '-') term)*
-term    ::= factor (('*' | '/') factor)*
-factor  ::= INT/LONGINT/FLOAT/DOUBLE
-            ('+' | '-') factor
-            ( expr )

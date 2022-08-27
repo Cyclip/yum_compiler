@@ -1,12 +1,20 @@
+//! Lexes and tokenizes a string into a stream of tokens.
+
 pub mod tokens;
 
 use tokens::{
-    Token, TokenType
+    Token,
+    TokenType,
+    Keyword,
 };
 
 use crate::errors::{Error, ErrorType};
 
-const DIGITS: [&str; 10] = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+use self::tokens::TokenPosition;
+
+const DIGITS: [char; 10] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const LETTERS: [char; 52] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
 
 #[derive(Debug)]
 pub struct Lexer {
@@ -37,6 +45,16 @@ impl LexerPosition {
         }
     }
 
+    pub fn from(token_pos: TokenPosition) -> LexerPosition {
+        LexerPosition {
+            line: token_pos.line,
+            column: token_pos.column,
+            pos: 0,
+            current_char: None,
+            text: "".to_string(),
+        }
+    }
+
     pub fn advance(&mut self) {
         self.pos += 1;
         self.column += 1;
@@ -57,7 +75,6 @@ impl Lexer {
         let mut tokens: Vec<Token> = Vec::new();
 
         while let Some(current_char) = self.position.current_char {
-            println!("Current char: '{}'", current_char);
             // ignore whitespace
             if current_char.is_whitespace() {
                 self.position.advance();
@@ -120,17 +137,26 @@ impl Lexer {
                     tokens.push(Token::new(TokenType::Slash, &self.position));
                     self.position.advance();
                     continue;
-                }
+                },
+                '=' => {
+                    tokens.push(Token::new(TokenType::Equal, &self.position));
+                    self.position.advance();
+                    continue;
+                },
                 _ => (),
             };
             
             // check if number
             if self.is_digit(current_char) {
-                match self.make_number() {
-                    Ok(token) => tokens.push(token),
-                    Err(e) => return Err(e),
-                };
+                let number_token = self.make_number()?;
+                tokens.push(number_token);
+                continue;
+            }
 
+            // check if identifier
+            if self.is_letter(current_char) {
+                let identifier_token = self.make_identifier()?;
+                tokens.push(identifier_token);
                 continue;
             }
 
@@ -147,6 +173,52 @@ impl Lexer {
         Ok(tokens)
     }
 
+    /// Create an identifier token from the current position
+    fn make_identifier(&mut self) -> Result<Token, Error> {
+        let mut identifier: String = String::new();
+
+        while let Some(current_char) = self.position.current_char {
+            if current_char.is_whitespace() {
+                // identifier is finished
+                break;
+            }
+
+            if self.is_letter(current_char) {
+                identifier.push(current_char);
+                self.position.advance();
+                continue;
+            } else if self.is_digit(current_char) {
+                // ensure it is not the first character
+                if identifier.is_empty() {
+                    return Err(Error::new(
+                        ErrorType::InvalidToken,
+                        format!("Unexpected character: '{}'", current_char),
+                        &self.position
+                    ));
+                } else {
+                    identifier.push(current_char);
+                    self.position.advance();
+                    continue;
+                }
+            } else {
+                return Err(Error::new(
+                    ErrorType::InvalidToken,
+                    format!("Unexpected character: '{}'", current_char),
+                    &self.position
+                ));
+            }
+        };
+
+        // determine whether it is a identifier or keyword
+
+        match Keyword::from(&identifier) {
+            Some(keyword) => Ok(Token::new(TokenType::Keyword(keyword), &self.position)),
+            None => Ok(Token::new(TokenType::Identifier(identifier), &self.position)),
+        }
+
+    }
+
+    /// Create a number token from the current position
     fn make_number(&mut self) -> Result<Token, Error> {
         let mut number = String::new();
         let mut dot_count = 0;
@@ -172,13 +244,17 @@ impl Lexer {
         }
 
         if dot_count == 0 {
-            Ok(Token::new(TokenType::Integer(number.parse::<u32>().unwrap()), &self.position))
+            Ok(Token::new(TokenType::Integer(number.parse::<i32>().unwrap()), &self.position))
         } else {
             Ok(Token::new(TokenType::Float(number.parse::<f32>().unwrap()), &self.position))
         }
     }
 
     fn is_digit(&self, c: char) -> bool {
-        DIGITS.contains(&c.to_string().as_str())
+        DIGITS.contains(&c)
+    }
+
+    fn is_letter(&self, c: char) -> bool {
+        LETTERS.contains(&c)
     }
 }
