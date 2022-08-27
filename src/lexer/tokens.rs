@@ -44,12 +44,18 @@ pub enum TokenType {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Keyword {
     Let,
+    And,
+    Not,
+    Or,
 }
 
 impl Keyword {
     pub fn from(s: &str) -> Option<Keyword> {
         match s {
             "let" => Some(Keyword::Let),
+            "and" => Some(Keyword::And),
+            "not" => Some(Keyword::Not),
+            "or" => Some(Keyword::Or),
             _ => None,
         }
     }

@@ -7,6 +7,7 @@ use std::env;
 fn compile(source: &str) -> Result<(), errors::Error> {
     let mut lexer = lexer::Lexer::new(source.to_string());
     let tokens = lexer.make_tokens()?;
+    println!("Tokens: {:#?}", tokens);
     let mut parser = parser::Parser::new(tokens);
     let ast = parser.parse()?;
     println!("{:#?}", ast);

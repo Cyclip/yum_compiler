@@ -1,8 +1,15 @@
-expr    ::= keyword:var identifier = expr;
-        ::= term (('+' | '-') term)*
+expr            ::= keyword:var identifier = expr
+                ::= compare-expr ((keyword:and | keyword:or) compare-expr)*
+                
+compare-expr    ::= (keyword:not) compare-expr
+                ::= arith-expr (('==' | '!=' | '<' | '<=' | '>' | '>) arith-expr)*
 
-term    ::= factor (('*' | '/') factor)*
+arith-expr      ::= term (('+' | '-') term)*
 
-factor  ::= INT/LONGINT/FLOAT/DOUBLE
-        ::= ('+' | '-') factor
-        ::= ( expr )
+term            ::= factor (('*' | '/') factor)*
+
+factor          ::= INT/LONGINT/FLOAT/DOUBLE
+                ::= ('+' | '-') factor
+                ::= ( expr )
+
+not a == b  --> not (a == b)

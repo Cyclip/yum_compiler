@@ -139,8 +139,23 @@ impl Lexer {
                     continue;
                 },
                 '=' => {
-                    tokens.push(Token::new(TokenType::Equal, &self.position));
-                    self.position.advance();
+                    let token = self.make_equals()?;
+                    tokens.push(token);
+                    continue;
+                },
+                '!' => {
+                    let token = self.make_not_equals()?;
+                    tokens.push(token);
+                    continue;
+                },
+                '>' => {
+                    let token = self.make_greater_than()?;
+                    tokens.push(token);
+                    continue;
+                },
+                '<' => {
+                    let token = self.make_less_than()?;
+                    tokens.push(token);
                     continue;
                 },
                 _ => (),
@@ -171,6 +186,74 @@ impl Lexer {
         tokens.push(Token::new(TokenType::EOF, &self.position));
 
         Ok(tokens)
+    }
+
+    fn peek_char(&self) -> Option<char> {
+        self.text.chars().nth(self.position.pos + 1)
+    }
+
+    /// Try to make >=, if not just return !
+    fn make_less_than(&mut self) -> Result<Token, Error> {
+        let token_type = if self.peek_char() == Some('=') {
+            self.position.advance();
+            TokenType::LessEqual
+        } else {
+            TokenType::Less
+        };
+
+        let token = Token::new(token_type, &self.position);
+
+        self.position.advance();
+
+        Ok(token)
+    }
+
+    /// Try to make >=, if not just return !
+    fn make_greater_than(&mut self) -> Result<Token, Error> {
+        let token_type = if self.peek_char() == Some('=') {
+            self.position.advance();
+            TokenType::GreaterEqual
+        } else {
+            TokenType::Greater
+        };
+
+        let token = Token::new(token_type, &self.position);
+
+        self.position.advance();
+
+        Ok(token)
+    }
+
+    /// Try to make !=, if not just return !
+    fn make_not_equals(&mut self) -> Result<Token, Error> {
+        let token_type = if self.peek_char() == Some('=') {
+            self.position.advance();
+            TokenType::BangEqual
+        } else {
+            TokenType::Bang
+        };
+
+        let token = Token::new(token_type, &self.position);
+
+        self.position.advance();
+
+        Ok(token)
+    }
+
+    /// Try to make an == operator, if not just return a single =
+    fn make_equals(&mut self) -> Result<Token, Error> {
+        let token_type = if self.peek_char() == Some('=') {
+            self.position.advance();
+            TokenType::EqualEqual
+        } else {
+            TokenType::Equal
+        };
+
+        let token = Token::new(token_type, &self.position);
+
+        self.position.advance();
+
+        Ok(token)
     }
 
     /// Create an identifier token from the current position

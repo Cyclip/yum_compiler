@@ -118,6 +118,152 @@ impl Parser {
     // Located in src/grammar.txt
     // =========================================
 
+    /// Expression
+    fn gr_expr(&mut self) -> Result<Node, Error> {
+        println!("gr_expr on {:?}", self.get_current_token());
+        // check if keyword var instead
+        let current_token = self.get_current_token().expect("Expected token");
+        match current_token.value {
+            TokenType::Keyword(Keyword::Let) => {
+                // expecting variable assignment
+                println!("Expecting variable assignment");
+                self.advance();
+
+                // ensure the next token is a variable name (identifier)
+                let var_name_identifier = match self.get_current_token() {
+                    // check if a token exists at the current position
+                    Some(token) => {
+                        // token exists, check if its an identifier or not
+                        match token.value {
+                            // token is an identifier
+                            // return it
+                            TokenType::Identifier(_) => {
+                                self.advance();
+                                token
+                            },
+                            _ => {
+                                // token is not an identifier
+                                return Err(Error::new_parser_error(
+                                    format!("Expected identifier, found {:?}", token.value),
+                                    &token.position,
+                                ));
+                            }
+                        }
+                    },
+                    None => {
+                        return Err(self.error_missing_token())
+                    }
+                };
+
+                println!("Got identifier: {:?}", var_name_identifier);
+
+                // ensure the next token is an equals sign
+                self.expect(TokenType::Equal)?;
+                self.advance();
+
+                println!("Got equals sign");
+
+                // ensure the next token is an expression
+                let expr = self.gr_expr()?;
+
+                println!("Got expression");
+                Ok(Node::VarAssignmentNode(Box::new(VarAssignmentNode::new(var_name_identifier, expr))))
+            },
+            _ => {
+                let mut left_node = self.gr_compare_expr()?;
+
+                while !self.reached_eof() {
+                    if [TokenType::Keyword(Keyword::And), TokenType::Keyword(Keyword::Or)].contains(&self.get_current_token().unwrap().value) {
+                        let op_token = self.get_current_token().unwrap();
+                        self.advance();
+                        let right_node = self.gr_compare_expr()?;
+                        left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                    } else {
+                        break;
+                    }
+                }
+
+                Ok(left_node)
+            }
+        }
+    }
+
+    /// Compare Expression
+    fn gr_compare_expr(&mut self) -> Result<Node, Error> {
+        println!("gr_compare_expr on {:?}", self.get_current_token());
+        
+        let current_token = self.get_current_token().expect("No token found");
+
+        match current_token.value {
+            TokenType::Keyword(Keyword::Not) => {
+                // negation
+                self.advance();
+                // expect another compare expression
+                let right_node = self.gr_compare_expr()?;
+                Ok(Node::UnaryOpNode(Box::new(UnaryOpNode::new(current_token, right_node))))
+            },
+            _ => {
+                // find terms separated by operators
+                let mut left_node = self.gr_arithmetic_expr()?;
+
+                while !self.reached_eof() {
+                    if [TokenType::EqualEqual, TokenType::BangEqual, TokenType::Less, TokenType::LessEqual, TokenType::Greater, TokenType::GreaterEqual].contains(&self.get_current_token().unwrap().value) {
+                        let op_token = self.get_current_token().unwrap();
+                        self.advance();
+                        let right_node = self.gr_arithmetic_expr()?;
+                        left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                    } else {
+                        break;
+                    }
+                }
+                Ok(left_node)
+            }
+        }
+
+        
+    }
+
+    /// Arithmetic Expression
+    fn gr_arithmetic_expr(&mut self) -> Result<Node, Error> {
+        println!("gr_arithmetic_expr on {:?}", self.get_current_token());
+        // find terms separated by operators
+        let mut left_node = self.gr_term()?;
+
+        while !self.reached_eof() {
+            if [TokenType::Plus, TokenType::Minus].contains(&self.get_current_token().unwrap().value) {
+                let op_token = self.get_current_token().unwrap();
+                self.advance();
+                let right_node = self.gr_term()?;
+                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+            } else {
+                break;
+            }
+        }
+
+        Ok(left_node)
+    }
+
+    /// Term
+    fn gr_term(&mut self) -> Result<Node, Error> {
+        println!("gr_term on {:?}", self.get_current_token());
+        // find factors separated by operators
+
+        let mut left_node = self.gr_factor()?;
+
+        while !self.reached_eof() {
+            if [TokenType::Star, TokenType::Slash].contains(&self.get_current_token().unwrap().value) {
+                let op_token = self.get_current_token().unwrap();
+                self.advance();
+                let right_node = self.gr_factor()?;
+                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+            } else {
+                break;
+            }
+        }
+
+        Ok(left_node)
+    }
+
     /// Factor
     fn gr_factor(&mut self) -> Result<Node, Error> {
         println!("gr_factor on {:?}", self.get_current_token());
@@ -179,104 +325,6 @@ impl Parser {
                 }
             }
             None => return Err(self.error_missing_token()),
-        }
-    }
-
-    /// Term
-    fn gr_term(&mut self) -> Result<Node, Error> {
-        println!("gr_term on {:?}", self.get_current_token());
-        // find factors separated by operators
-
-        let mut left_node = self.gr_factor()?;
-
-        while !self.reached_eof() {
-            if [TokenType::Star, TokenType::Slash].contains(&self.get_current_token().unwrap().value) {
-                let op_token = self.get_current_token().unwrap();
-                self.advance();
-                let right_node = self.gr_factor()?;
-                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
-            } else {
-                break;
-            }
-        }
-
-        Ok(left_node)
-    }
-
-    /// Expression
-    fn gr_expr(&mut self) -> Result<Node, Error> {
-        println!("gr_expr on {:?}", self.get_current_token());
-        // check if keyword var instead
-        let current_token = self.get_current_token().expect("Expected token");
-        match current_token.value {
-            TokenType::Keyword(Keyword::Let) => {
-                // expecting variable assignment
-                println!("Expecting variable assignment");
-                self.advance();
-
-                // ensure the next token is a variable name (identifier)
-                let var_name_identifier = match self.get_current_token() {
-                    // check if a token exists at the current position
-                    Some(token) => {
-                        // token exists, check if its an identifier or not
-                        match token.value {
-                            // token is an identifier
-                            // return it
-                            TokenType::Identifier(_) => {
-                                self.advance();
-                                token
-                            },
-                            _ => {
-                                // token is not an identifier
-                                return Err(Error::new_parser_error(
-                                    format!("Expected identifier, found {:?}", token.value),
-                                    &token.position,
-                                ));
-                            }
-                        }
-                    },
-                    None => {
-                        return Err(self.error_missing_token())
-                    }
-                };
-
-                println!("Got identifier: {:?}", var_name_identifier);
-
-                // ensure the next token is an equals sign
-                self.expect(TokenType::Equal)?;
-                self.advance();
-
-                println!("Got equals sign");
-
-                // ensure the next token is an expression
-                let expr = self.gr_expr()?;
-
-                println!("Got expression");
-
-                // ensure final token is a semicolon
-                self.expect(TokenType::Semicolon)?;
-                self.advance();
-
-                println!("Got semicolon");
-                Ok(Node::VarAssignmentNode(Box::new(VarAssignmentNode::new(var_name_identifier, expr))))
-            },
-            _ => {
-                // find terms separated by operators
-                let mut left_node = self.gr_term()?;
-
-                while !self.reached_eof() {
-                    if [TokenType::Plus, TokenType::Minus].contains(&self.get_current_token().unwrap().value) {
-                        let op_token = self.get_current_token().unwrap();
-                        self.advance();
-                        let right_node = self.gr_term()?;
-                        left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
-                    } else {
-                        break;
-                    }
-                }
-
-                Ok(left_node)
-            }
         }
     }
 }
