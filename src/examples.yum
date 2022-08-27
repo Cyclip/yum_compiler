@@ -1,0 +1,26 @@
+// Comments
+
+// Variable declaration
+// let <identifier> = <expression>
+let a = 5
+let b = 2.5
+let c = 7
+let d = 0
+
+// If statements
+// if <condition> {
+//     <expression>
+// } else if <condition> {
+//     <expression>
+// } else {
+//     <expression>
+// }
+
+if a > b {
+    d = b
+} else if a > c {
+    d = c
+} else {
+    d = a
+}
+

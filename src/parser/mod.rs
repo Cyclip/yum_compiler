@@ -9,8 +9,10 @@ use nodes::{
     UnaryOpNode,
     VarAssignmentNode,
     VarAccessNode,
+    IfExprNode,
 };
-use crate::lexer::tokens::{Token, TokenType, Keyword};
+
+use crate::lexer::tokens::{Token, TokenType, Keyword, TokenPosition};
 use crate::errors::{Error, ErrorType};
 
 /// Parses the tokens into an AST
@@ -45,7 +47,7 @@ impl Parser {
         } {
             return Err(Error::new_parser_error(
                 "Expected EOF".to_string(),
-                &self.get_current_token().unwrap().position,
+                &self.get_current_token_err()?.position,
             ));
         } else {
             return res;
@@ -71,13 +73,28 @@ impl Parser {
     fn advance(&mut self) -> Option<Token> {
         self.token_index += 1;
         self.current_token = Parser::try_get_token(&self.tokens, self.token_index);
+        println!("\nAdvanced to: \t\t\t\t{:?}\n", self.current_token);
         self.get_current_token()
     }
 
+    /// Safely get the current token
     fn get_current_token(&self) -> Option<Token> {
         self.current_token.clone()
     }
 
+    /// Get the current token and return an error if needed
+    fn get_current_token_err(&self) -> Result<Token, Error> {
+        match self.get_current_token() {
+            Some(token) => Ok(token),
+            None => Err(self.error_missing_token()),
+        }
+    }
+
+    fn get_last_token(&self) -> Token {
+        Parser::try_get_token(&self.tokens, self.token_index - 1).expect("Failed to get last token")
+    }
+
+    /// Check whether the end of file has been reached
     fn reached_eof(&self) -> bool {
         match self.current_token {
             Some(_) => false,
@@ -91,14 +108,14 @@ impl Parser {
     fn error_missing_token(&self) -> Error {
         Error::new_parser_error(
             "Expected token".to_string(),
-            &self.get_current_token().unwrap().position,
+            &self.get_last_token().position,
         )
     }
 
     /// Expect a token of a given type at the current location
     /// DOES NOT ADVANCE THE PARSER
     fn expect(&self, token_type: TokenType) -> Result<(), Error> {
-        println!("Expecting {:?} at {:?} ({:?})", token_type, self.get_current_token().unwrap().position, self.get_current_token().unwrap().value);
+        println!("Expecting {:?} at {:?} ({:?})", token_type, self.get_current_token_err()?.position, self.get_current_token_err()?.value);
         match self.get_current_token() {
             Some(token) => {
                 if token.value == token_type {
@@ -120,7 +137,7 @@ impl Parser {
 
     /// Expression
     fn gr_expr(&mut self) -> Result<Node, Error> {
-        println!("gr_expr on {:?}", self.get_current_token());
+        println!("Expression\t\t\t\t{:?}", self.get_current_token());
         // check if keyword var instead
         let current_token = self.get_current_token().expect("Expected token");
         match current_token.value {
@@ -173,8 +190,8 @@ impl Parser {
                 let mut left_node = self.gr_compare_expr()?;
 
                 while !self.reached_eof() {
-                    if [TokenType::Keyword(Keyword::And), TokenType::Keyword(Keyword::Or)].contains(&self.get_current_token().unwrap().value) {
-                        let op_token = self.get_current_token().unwrap();
+                    if [TokenType::Keyword(Keyword::And), TokenType::Keyword(Keyword::Or)].contains(&self.get_current_token_err()?.value) {
+                        let op_token = self.get_current_token_err()?;
                         self.advance();
                         let right_node = self.gr_compare_expr()?;
                         left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
@@ -190,7 +207,7 @@ impl Parser {
 
     /// Compare Expression
     fn gr_compare_expr(&mut self) -> Result<Node, Error> {
-        println!("gr_compare_expr on {:?}", self.get_current_token());
+        println!("Compare expression\t\t\t{:?}", self.get_current_token());
         
         let current_token = self.get_current_token().expect("No token found");
 
@@ -207,8 +224,8 @@ impl Parser {
                 let mut left_node = self.gr_arithmetic_expr()?;
 
                 while !self.reached_eof() {
-                    if [TokenType::EqualEqual, TokenType::BangEqual, TokenType::Less, TokenType::LessEqual, TokenType::Greater, TokenType::GreaterEqual].contains(&self.get_current_token().unwrap().value) {
-                        let op_token = self.get_current_token().unwrap();
+                    if [TokenType::EqualEqual, TokenType::BangEqual, TokenType::Less, TokenType::LessEqual, TokenType::Greater, TokenType::GreaterEqual].contains(&self.get_current_token_err()?.value) {
+                        let op_token = self.get_current_token_err()?;
                         self.advance();
                         let right_node = self.gr_arithmetic_expr()?;
                         left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
@@ -225,13 +242,13 @@ impl Parser {
 
     /// Arithmetic Expression
     fn gr_arithmetic_expr(&mut self) -> Result<Node, Error> {
-        println!("gr_arithmetic_expr on {:?}", self.get_current_token());
+        println!("Arith expression\t\t\t{:?}", self.get_current_token());
         // find terms separated by operators
         let mut left_node = self.gr_term()?;
 
         while !self.reached_eof() {
-            if [TokenType::Plus, TokenType::Minus].contains(&self.get_current_token().unwrap().value) {
-                let op_token = self.get_current_token().unwrap();
+            if [TokenType::Plus, TokenType::Minus].contains(&self.get_current_token_err()?.value) {
+                let op_token = self.get_current_token_err()?;
                 self.advance();
                 let right_node = self.gr_term()?;
                 left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
@@ -245,14 +262,14 @@ impl Parser {
 
     /// Term
     fn gr_term(&mut self) -> Result<Node, Error> {
-        println!("gr_term on {:?}", self.get_current_token());
+        println!("Term\t\t\t\t\t{:?}", self.get_current_token());
         // find factors separated by operators
 
         let mut left_node = self.gr_factor()?;
 
         while !self.reached_eof() {
-            if [TokenType::Star, TokenType::Slash].contains(&self.get_current_token().unwrap().value) {
-                let op_token = self.get_current_token().unwrap();
+            if [TokenType::Star, TokenType::Slash].contains(&self.get_current_token_err()?.value) {
+                let op_token = self.get_current_token_err()?;
                 self.advance();
                 let right_node = self.gr_factor()?;
                 left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
@@ -266,7 +283,7 @@ impl Parser {
 
     /// Factor
     fn gr_factor(&mut self) -> Result<Node, Error> {
-        println!("gr_factor on {:?}", self.get_current_token());
+        println!("Factor\t\t\t\t\t{:?}", self.get_current_token());
         // try to find int/longint/float/double
         // if not found, raise error
 
@@ -283,7 +300,7 @@ impl Parser {
 
                     // if it is a unary operator (negation or positive), return a UnaryOpNode
                     TokenType::Plus | TokenType::Minus => {
-                        let unary_op = self.get_current_token().unwrap();
+                        let unary_op = self.get_current_token_err()?;
                         self.advance();
                         let factor = self.gr_factor()?;
                         let unary_op_node = UnaryOpNode::new(unary_op, factor);
@@ -312,19 +329,91 @@ impl Parser {
                         }
                     },
 
+                    // if it is an identifier, return a variable access node
                     TokenType::Identifier(_) => {
                         let var_access_node = VarAccessNode::new(token);
                         self.advance();
                         Ok(Node::VarAccessNode(Box::new(var_access_node)))
+                    },
+
+                    // if it is an if keyword, return an if node
+                    TokenType::Keyword(Keyword::If) => {
+                        self.advance();
+                        self.gr_if_expr()
                     }
 
+                    // if no matches, return an error
                     _ => Err(Error::new_parser_error(
                         format!("Expected factor, found {:?}", token.value),
                         &token.position,
                     )),
                 }
-            }
+            },
+
             None => return Err(self.error_missing_token()),
         }
+    }
+
+    /// If Expression
+    /// Must have advanced past 'if' keyword
+    fn gr_if_expr(&mut self) -> Result<Node, Error> {
+        println!("If expression\t\t\t\t{:?}", self.get_current_token());
+
+        // cases to consider
+        let mut else_case: Option<Node> = None;
+
+        // get condition expression
+        let condition = self.gr_expr()?;
+
+        // expect curly braces
+        self.expect(TokenType::LeftBrace)?;
+        self.advance();
+
+        // get expression to be evaluated if condition is true
+        let if_true = self.gr_expr()?;
+
+        // expect curly braces
+        self.expect(TokenType::RightBrace)?;
+        self.advance();
+
+        // optional else keyword
+        match self.get_current_token() {
+            Some(token) => {
+                match token.value {
+                    TokenType::Keyword(Keyword::Else) => {
+                        self.advance();
+
+                        println!("Found else keyword, advanced to {:?}", self.get_current_token());
+
+                        // nested if expression
+                        if self.get_current_token_err()?.value == TokenType::Keyword(Keyword::If) {
+                            self.advance();
+                            println!("Found nested if expression");
+                            else_case = Some(self.gr_if_expr()?);
+                            println!("else_case: {:?}", else_case);
+                        } else {
+                            println!("Found else expression");
+                            // expect curly braces
+                            self.expect(TokenType::LeftBrace)?;
+                            self.advance();
+
+                            // get expression to be evaluated if condition is false
+                            let if_false = self.gr_expr()?;
+
+                            // expect curly braces
+                            self.expect(TokenType::RightBrace)?;
+                            self.advance();
+
+                            else_case = Some(if_false);
+                        }
+                    },
+                    _ => {},
+                }
+            },
+            None => {}
+        }
+
+        Ok(Node::IfExprNode(Box::new(IfExprNode::new(condition, if_true, else_case))))
+
     }
 }

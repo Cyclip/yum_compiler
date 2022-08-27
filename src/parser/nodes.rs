@@ -13,6 +13,7 @@ pub enum Node {
     UnaryOpNode(Box<UnaryOpNode>),
     VarAssignmentNode(Box<VarAssignmentNode>),
     VarAccessNode(Box<VarAccessNode>),
+    IfExprNode(Box<IfExprNode>),
 }
 
 // =========================== All nodes ===========================
@@ -48,6 +49,14 @@ pub struct VarAssignmentNode {
 #[derive(Debug)]
 pub struct VarAccessNode {
     identifier: Token,
+}
+
+/// If statement expression node
+#[derive(Debug)]
+pub struct IfExprNode {
+    condition: Node,
+    if_true: Node,
+    if_false: Option<Node>,
 }
 
 // =========================== Node impl ===========================
@@ -88,5 +97,15 @@ impl VarAssignmentNode {
 impl VarAccessNode {
     pub fn new(identifier: Token) -> VarAccessNode {
         VarAccessNode { identifier }
+    }
+}
+
+impl IfExprNode {
+    pub fn new(condition: Node, if_true: Node, if_false: Option<Node>) -> IfExprNode {
+        IfExprNode {
+            condition,
+            if_true,
+            if_false,
+        }
     }
 }

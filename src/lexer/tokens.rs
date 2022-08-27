@@ -47,6 +47,9 @@ pub enum Keyword {
     And,
     Not,
     Or,
+    If,
+    Else,
+    Elif,
 }
 
 impl Keyword {
@@ -56,6 +59,9 @@ impl Keyword {
             "and" => Some(Keyword::And),
             "not" => Some(Keyword::Not),
             "or" => Some(Keyword::Or),
+            "if" => Some(Keyword::If),
+            "else" => Some(Keyword::Else),
+            "elif" => Some(Keyword::Elif),
             _ => None,
         }
     }
