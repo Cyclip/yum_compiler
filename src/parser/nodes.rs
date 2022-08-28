@@ -59,6 +59,12 @@ pub struct IfExprNode {
     if_false: Option<Node>,
 }
 
+pub struct FuncDefNode {
+    identifier: Token,
+    parameters: Vec<Token>,
+    body: Node,
+}
+
 // =========================== Node impl ===========================
 impl NumberNode {
     pub fn new(token: Token) -> NumberNode {
@@ -106,6 +112,16 @@ impl IfExprNode {
             condition,
             if_true,
             if_false,
+        }
+    }
+}
+
+impl FuncDefNode {
+    pub fn new(identifier: Token, parameters: Vec<Token>, body: Node) -> FuncDefNode {
+        FuncDefNode {
+            identifier,
+            parameters,
+            body,
         }
     }
 }

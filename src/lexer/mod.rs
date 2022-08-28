@@ -158,6 +158,16 @@ impl Lexer {
                     tokens.push(token);
                     continue;
                 },
+                ',' => {
+                    tokens.push(Token::new(TokenType::Comma, &self.position));
+                    self.position.advance();
+                    continue;
+                },
+                '^' => {
+                    tokens.push(Token::new(TokenType::Caret, &self.position));
+                    self.position.advance();
+                    continue;
+                },
                 _ => (),
             };
             

@@ -22,6 +22,8 @@ pub struct Parser {
     current_token: Option<Token>,
 }
 
+type GrammarOutput = Result<Node, Error>;
+
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Parser {
         match tokens.len() {
@@ -38,7 +40,7 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Node, Error> {
+    pub fn parse(&mut self) -> GrammarOutput {
         let res = self.gr_expr();
 
         if match self.get_current_token() {
@@ -46,7 +48,7 @@ impl Parser {
             None => true,
         } {
             return Err(Error::new_parser_error(
-                "Expected EOF".to_string(),
+                format!("Unexpected token: {:?}, expected EOF", self.get_current_token().unwrap().value),
                 &self.get_current_token_err()?.position,
             ));
         } else {
@@ -112,7 +114,7 @@ impl Parser {
         )
     }
 
-    /// Expect a token of a given type at the current location
+    /// Expect a token of a given type at the current location.
     /// DOES NOT ADVANCE THE PARSER
     fn expect(&self, token_type: TokenType) -> Result<(), Error> {
         println!("Expecting {:?} at {:?} ({:?})", token_type, self.get_current_token_err()?.position, self.get_current_token_err()?.value);
@@ -136,7 +138,7 @@ impl Parser {
     // =========================================
 
     /// Expression
-    fn gr_expr(&mut self) -> Result<Node, Error> {
+    fn gr_expr(&mut self) -> GrammarOutput {
         println!("Expression\t\t\t\t{:?}", self.get_current_token());
         // check if keyword var instead
         let current_token = self.get_current_token().expect("Expected token");
@@ -206,7 +208,7 @@ impl Parser {
     }
 
     /// Compare Expression
-    fn gr_compare_expr(&mut self) -> Result<Node, Error> {
+    fn gr_compare_expr(&mut self) -> GrammarOutput {
         println!("Compare expression\t\t\t{:?}", self.get_current_token());
         
         let current_token = self.get_current_token().expect("No token found");
@@ -241,7 +243,7 @@ impl Parser {
     }
 
     /// Arithmetic Expression
-    fn gr_arithmetic_expr(&mut self) -> Result<Node, Error> {
+    fn gr_arithmetic_expr(&mut self) -> GrammarOutput {
         println!("Arith expression\t\t\t{:?}", self.get_current_token());
         // find terms separated by operators
         let mut left_node = self.gr_term()?;
@@ -261,7 +263,7 @@ impl Parser {
     }
 
     /// Term
-    fn gr_term(&mut self) -> Result<Node, Error> {
+    fn gr_term(&mut self) -> GrammarOutput {
         println!("Term\t\t\t\t\t{:?}", self.get_current_token());
         // find factors separated by operators
 
@@ -282,8 +284,28 @@ impl Parser {
     }
 
     /// Factor
-    fn gr_factor(&mut self) -> Result<Node, Error> {
+    fn gr_factor(&mut self) -> GrammarOutput {
+        // get atom
         println!("Factor\t\t\t\t\t{:?}", self.get_current_token());
+        let mut left_node = self.gr_atom()?;
+
+        while !self.reached_eof() {
+            if self.get_current_token_err()?.value == TokenType::Caret {
+                let op_token = self.get_current_token_err()?;
+                self.advance();
+                let right_node = self.gr_factor()?;
+                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+            } else {
+                break;
+            }
+        }
+
+        Ok(left_node)
+    }
+
+    /// Atom
+    fn gr_atom(&mut self) -> GrammarOutput {
+        println!("Atom\t\t\t\t\t{:?}", self.get_current_token());
         // try to find int/longint/float/double
         // if not found, raise error
 
@@ -302,7 +324,7 @@ impl Parser {
                     TokenType::Plus | TokenType::Minus => {
                         let unary_op = self.get_current_token_err()?;
                         self.advance();
-                        let factor = self.gr_factor()?;
+                        let factor = self.gr_atom()?;
                         let unary_op_node = UnaryOpNode::new(unary_op, factor);
                         Ok(Node::UnaryOpNode(Box::new(unary_op_node)))
                     },
@@ -336,15 +358,21 @@ impl Parser {
                         Ok(Node::VarAccessNode(Box::new(var_access_node)))
                     },
 
-                    // if it is an if keyword, return an if node
+                    // If keyword
                     TokenType::Keyword(Keyword::If) => {
                         self.advance();
                         self.gr_if_expr()
+                    },
+
+                    // Func keyword
+                    TokenType::Keyword(Keyword::Func) => {
+                        self.advance();
+                        self.gr_func_def()
                     }
 
                     // if no matches, return an error
                     _ => Err(Error::new_parser_error(
-                        format!("Expected factor, found {:?}", token.value),
+                        format!("Expected atom, found {:?}", token.value),
                         &token.position,
                     )),
                 }
@@ -356,7 +384,7 @@ impl Parser {
 
     /// If Expression
     /// Must have advanced past 'if' keyword
-    fn gr_if_expr(&mut self) -> Result<Node, Error> {
+    fn gr_if_expr(&mut self) -> GrammarOutput {
         println!("If expression\t\t\t\t{:?}", self.get_current_token());
 
         // cases to consider
@@ -415,5 +443,25 @@ impl Parser {
 
         Ok(Node::IfExprNode(Box::new(IfExprNode::new(condition, if_true, else_case))))
 
+    }
+
+    /// Function Definition
+    fn gr_func_def(&mut self) -> GrammarOutput {
+        panic!("Function definitions not yet implemented");
+        // expect an identifier
+        let identifier = match self.get_current_token_err()?.value {
+            TokenType::Identifier(identifier) => identifier,
+            _ => return Err(Error::new_parser_error(
+                format!("Expected identifier, got {:?}", self.get_current_token_err()?.value),
+                &self.get_current_token_err()?.position,
+            )),
+        };
+
+        // expect left parenthesis
+        self.expect(TokenType::LeftParen)?;
+        self.advance();
+
+        // 
+        unimplemented!()
     }
 }

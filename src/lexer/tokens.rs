@@ -22,6 +22,7 @@ pub enum TokenType {
     // Single-character tokens
     LeftParen, RightParen, LeftBrace, RightBrace,       // ( ) { }
     Comma, Dot, Minus, Plus, Semicolon, Slash, Star,    // , . - + ; / *
+    Caret,                                              // ^
 
     // One or two character tokens
     Bang, BangEqual,                                    // ! !=
@@ -50,6 +51,7 @@ pub enum Keyword {
     If,
     Else,
     Elif,
+    Func,
 }
 
 impl Keyword {
@@ -62,6 +64,7 @@ impl Keyword {
             "if" => Some(Keyword::If),
             "else" => Some(Keyword::Else),
             "elif" => Some(Keyword::Elif),
+            "func" => Some(Keyword::Func),
             _ => None,
         }
     }

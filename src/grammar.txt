@@ -1,4 +1,4 @@
-<expr>          ::= var identifier = <expr>
+<expr>          ::= var <identifier> = <expr>
                 ::= <compare-expr> ((and | or) <compare-expr>)*
                 
 <compare-expr>  ::= (not) <compare-expr>
@@ -8,11 +8,16 @@
 
 <term>          ::= <factor> (('*' | '/') <factor>)*
 
-<factor>        ::= INT/LONGINT/FLOAT/DOUBLE
-                ::= ('+' | '-') <factor>
+<factor>        ::= atom (^ <factor>)*
+
+<atom>          ::= INT/LONGINT/FLOAT/DOUBLE
+                ::= ('+' | '-') <atom>
                 ::= ( <expr> )
                 ::= <if-expr>
+                ::= <func-def>
 
 <if-expr>       ::= if <expr> { <expr> }
                         (elif { <expr> })*
                         (else { <expr> })?
+
+<func-def>      ::= func <identifier>( (<identifier> (',' <identifier>)* )? ) { expr }
