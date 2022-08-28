@@ -298,7 +298,7 @@ impl Parser {
     fn gr_factor(&mut self) -> GrammarOutput {
         // get atom
         println!("Factor\t\t\t\t\t{:?}", self.get_current_token());
-        let mut left_node = self.gr_atom()?;
+        let mut left_node = self.gr_call()?;
 
         while !self.reached_eof() {
             if self.get_current_token_err()?.value == TokenType::Caret {
@@ -311,6 +311,37 @@ impl Parser {
             }
         }
 
+        Ok(left_node)
+    }
+
+    /// Call
+    fn gr_call(&mut self) -> GrammarOutput {
+        println!("Call\t\t\t\t\t{:?}", self.get_current_token());
+        let mut left_node = self.gr_atom()?;
+
+        let current_tok = self.get_current_token_err()?;
+
+        if current_tok.value == TokenType::LeftParen {
+            // they are calling the identifier left_node
+            self.advance();
+
+            let mut args = Vec::new();
+            while self.get_current_token_err()?.value != TokenType::RightParen {
+                args.push(self.gr_expr()?);
+                
+                // if there is a comma, move on to the next argument
+                if self.get_current_token_err()?.value == TokenType::Comma {
+                    self.advance();
+                    continue;
+                }
+            };
+
+            self.expect(TokenType::RightParen)?;
+            self.advance();
+
+            return Ok(Node::FuncCallNode(Box::new(FuncCallNode::new(left_node, args))));
+        }
+        
         Ok(left_node)
     }
 
