@@ -14,6 +14,8 @@ pub enum Node {
     VarAssignmentNode(Box<VarAssignmentNode>),
     VarAccessNode(Box<VarAccessNode>),
     IfExprNode(Box<IfExprNode>),
+    FuncDefNode(Box<FuncDefNode>),
+    FuncCallNode(Box<FuncCallNode>),
 }
 
 // =========================== All nodes ===========================
@@ -59,10 +61,19 @@ pub struct IfExprNode {
     if_false: Option<Node>,
 }
 
+/// Function definition node
+#[derive(Debug)]
 pub struct FuncDefNode {
     identifier: Token,
     parameters: Vec<Token>,
-    body: Node,
+    body: Option<Node>,
+}
+
+/// Function call node
+#[derive(Debug)]
+pub struct FuncCallNode {
+    func_node: Node,
+    args: Vec<Node>,
 }
 
 // =========================== Node impl ===========================
@@ -117,11 +128,20 @@ impl IfExprNode {
 }
 
 impl FuncDefNode {
-    pub fn new(identifier: Token, parameters: Vec<Token>, body: Node) -> FuncDefNode {
+    pub fn new(identifier: Token, parameters: Vec<Token>, body: Option<Node>) -> FuncDefNode {
         FuncDefNode {
             identifier,
             parameters,
             body,
+        }
+    }
+}
+
+impl FuncCallNode {
+    pub fn new(func_node: Node, args: Vec<Node>) -> FuncCallNode {
+        FuncCallNode {
+            func_node,
+            args,
         }
     }
 }

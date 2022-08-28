@@ -8,7 +8,9 @@
 
 <term>          ::= <factor> (('*' | '/') <factor>)*
 
-<factor>        ::= atom (^ <factor>)*
+<factor>        ::= call (^ <factor>)*
+
+<call>          ::= atom (<expr> (',' <expr>)* )?
 
 <atom>          ::= INT/LONGINT/FLOAT/DOUBLE
                 ::= ('+' | '-') <atom>

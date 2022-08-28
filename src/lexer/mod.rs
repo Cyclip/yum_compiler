@@ -81,6 +81,8 @@ impl Lexer {
                 continue;
             }
 
+            println!("Current char is {}", current_char);
+
             // check for single-character tokens
             match current_char {
                 '(' => {
@@ -156,11 +158,6 @@ impl Lexer {
                 '<' => {
                     let token = self.make_less_than()?;
                     tokens.push(token);
-                    continue;
-                },
-                ',' => {
-                    tokens.push(Token::new(TokenType::Comma, &self.position));
-                    self.position.advance();
                     continue;
                 },
                 '^' => {
@@ -294,11 +291,12 @@ impl Lexer {
                     continue;
                 }
             } else {
-                return Err(Error::new(
-                    ErrorType::InvalidToken,
-                    format!("Unexpected character: '{}'", current_char),
-                    &self.position
-                ));
+                // return Err(Error::new(
+                //     ErrorType::InvalidToken,
+                //     format!("Unexpected character: '{}'", current_char),
+                //     &self.position
+                // ));
+                break;
             }
         };
 

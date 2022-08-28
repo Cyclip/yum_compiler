@@ -10,6 +10,8 @@ use nodes::{
     VarAssignmentNode,
     VarAccessNode,
     IfExprNode,
+    FuncDefNode,
+    FuncCallNode,
 };
 
 use crate::lexer::tokens::{Token, TokenType, Keyword, TokenPosition};
@@ -92,6 +94,15 @@ impl Parser {
         }
     }
 
+    /// Peek at the next token in the stream
+    fn peek_token(&self) -> Result<Token, Error> {
+        match Parser::try_get_token(&self.tokens, self.token_index + 1) {
+            Some(token) => Ok(token),
+            None => Err(self.error_missing_token()),
+        }
+    }
+
+    /// Get the last token
     fn get_last_token(&self) -> Token {
         Parser::try_get_token(&self.tokens, self.token_index - 1).expect("Failed to get last token")
     }
@@ -447,21 +458,75 @@ impl Parser {
 
     /// Function Definition
     fn gr_func_def(&mut self) -> GrammarOutput {
-        panic!("Function definitions not yet implemented");
+        println!("Function definition\t\t\t{:?}", self.get_current_token());
         // expect an identifier
-        let identifier = match self.get_current_token_err()?.value {
-            TokenType::Identifier(identifier) => identifier,
+        let current_tok = self.get_current_token_err()?;
+        let identifier = match current_tok.value {
+            TokenType::Identifier(_) => current_tok,
             _ => return Err(Error::new_parser_error(
                 format!("Expected identifier, got {:?}", self.get_current_token_err()?.value),
                 &self.get_current_token_err()?.position,
             )),
         };
 
-        // expect left parenthesis
+        self.advance();
+
+        // expect () or (identifier) or (identifier, identifier, ...)
         self.expect(TokenType::LeftParen)?;
         self.advance();
 
-        // 
-        unimplemented!()
+        let mut parameters: Vec<Token> = Vec::new();
+        
+        let current_tok = self.get_current_token_err()?;
+
+        match current_tok.value {
+            TokenType::Identifier(_) => {
+                parameters.push(current_tok);
+                self.advance();
+            },
+            _ => {}
+        }
+
+        // one or more ", <identifier>"
+        while self.get_current_token_err()?.value == TokenType::Comma {
+            println!("Expecting identifier");
+            self.advance();
+            let current_tok = self.get_current_token_err()?;
+
+            match current_tok.value {
+                TokenType::Identifier(_) => {
+                    parameters.push(current_tok);
+                    self.advance();
+                },
+                _ => {
+                    return Err(Error::new_parser_error(
+                        format!("Expected identifier, got {:?}", self.get_current_token_err()?.value),
+                        &self.get_current_token_err()?.position,
+                    ))
+                }
+            }
+        };
+
+        // expect right parenthesis
+        self.expect(TokenType::RightParen)?;
+        self.advance();
+
+        // expect { expr }
+        self.expect(TokenType::LeftBrace)?;
+        self.advance();
+
+        // check if the next char is a right brace, if not expect an expression before
+        let body: Option<Node> = if self.get_current_token_err()?.value == TokenType::RightBrace {
+            println!("Expecting empty expressionn");
+            None
+        } else {
+            println!("Expecting expression");
+            Some(self.gr_expr()?)
+        };
+
+        self.expect(TokenType::RightBrace)?;
+        self.advance();
+
+        Ok(Node::FuncDefNode(Box::new(FuncDefNode::new(identifier, parameters, body))))
     }
 }
