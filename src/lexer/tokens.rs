@@ -30,9 +30,10 @@ pub enum TokenType {
     Greater, GreaterEqual,                              // > >=
     Less, LessEqual,                                    // < <=
 
-    // Number literals
+    // Literals
     Integer(i32),                                       // 12345
     Float(f32),                                         // 123.45
+    String(String),                                     // "hello"
 
     // Identifiers and keywords
     Identifier(String),                                 // my_identifier

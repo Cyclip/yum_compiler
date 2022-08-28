@@ -15,6 +15,7 @@
 <atom>          ::= INT/LONGINT/FLOAT/DOUBLE
                 ::= ('+' | '-') <atom>
                 ::= ( <expr> )
+                ::= " STRING "
                 ::= <if-expr>
                 ::= <func-def>
 

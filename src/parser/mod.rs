@@ -4,7 +4,8 @@ pub mod nodes;
 
 use nodes::{
     Node, 
-    NumberNode, 
+    NumberNode,
+    StringNode,
     BinOpNode, 
     UnaryOpNode,
     VarAssignmentNode,
@@ -207,7 +208,7 @@ impl Parser {
                         let op_token = self.get_current_token_err()?;
                         self.advance();
                         let right_node = self.gr_compare_expr()?;
-                        left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                        left_node = Node::BinOpNode(Box::new(BinOpNode::new(left_node, op_token, right_node)));
                     } else {
                         break;
                     }
@@ -241,7 +242,7 @@ impl Parser {
                         let op_token = self.get_current_token_err()?;
                         self.advance();
                         let right_node = self.gr_arithmetic_expr()?;
-                        left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                        left_node = Node::BinOpNode(Box::new(BinOpNode::new(left_node, op_token, right_node)));
                     } else {
                         break;
                     }
@@ -264,7 +265,7 @@ impl Parser {
                 let op_token = self.get_current_token_err()?;
                 self.advance();
                 let right_node = self.gr_term()?;
-                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                left_node = Node::BinOpNode(Box::new(BinOpNode::new(left_node, op_token, right_node)));
             } else {
                 break;
             }
@@ -285,7 +286,7 @@ impl Parser {
                 let op_token = self.get_current_token_err()?;
                 self.advance();
                 let right_node = self.gr_factor()?;
-                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                left_node = Node::BinOpNode(Box::new(BinOpNode::new(left_node, op_token, right_node)));
             } else {
                 break;
             }
@@ -305,7 +306,7 @@ impl Parser {
                 let op_token = self.get_current_token_err()?;
                 self.advance();
                 let right_node = self.gr_factor()?;
-                left_node = Node::BinOp(Box::new(BinOpNode::new(left_node, op_token, right_node)));
+                left_node = Node::BinOpNode(Box::new(BinOpNode::new(left_node, op_token, right_node)));
             } else {
                 break;
             }
@@ -359,7 +360,13 @@ impl Parser {
                     TokenType::Integer(_) | TokenType::Float(_) => {
                         let number_node = NumberNode::new(token);
                         self.advance();
-                        Ok(Node::Number(Box::new(number_node)))
+                        Ok(Node::NumberNode(Box::new(number_node)))
+                    },
+
+                    TokenType::String(_) => {
+                        let string_node = StringNode::new(token);
+                        self.advance();
+                        Ok(Node::StringNode(Box::new(string_node)))
                     },
 
                     // if it is a unary operator (negation or positive), return a UnaryOpNode

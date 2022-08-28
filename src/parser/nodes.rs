@@ -8,8 +8,9 @@ use crate::{
 /// Different parser nodes
 #[derive(Debug)]
 pub enum Node {
-    Number(Box<NumberNode>),
-    BinOp(Box<BinOpNode>),
+    NumberNode(Box<NumberNode>),
+    StringNode(Box<StringNode>),
+    BinOpNode(Box<BinOpNode>),
     UnaryOpNode(Box<UnaryOpNode>),
     VarAssignmentNode(Box<VarAssignmentNode>),
     VarAccessNode(Box<VarAccessNode>),
@@ -22,6 +23,12 @@ pub enum Node {
 /// Number (int/float) node
 #[derive(Debug)]
 pub struct NumberNode {
+    token: Token,
+}
+
+/// String node (includes chars)
+#[derive(Debug)]
+pub struct StringNode {
     token: Token,
 }
 
@@ -80,6 +87,12 @@ pub struct FuncCallNode {
 impl NumberNode {
     pub fn new(token: Token) -> NumberNode {
         NumberNode { token }
+    }
+}
+
+impl StringNode {
+    pub fn new(token: Token) -> StringNode {
+        StringNode { token }
     }
 }
 

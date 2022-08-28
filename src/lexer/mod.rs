@@ -165,6 +165,11 @@ impl Lexer {
                     self.position.advance();
                     continue;
                 },
+                '"' => {
+                    let token = self.make_string()?;
+                    tokens.push(token);
+                    continue;
+                }
                 _ => (),
             };
             
@@ -195,6 +200,53 @@ impl Lexer {
         Ok(tokens)
     }
 
+    fn get_current_char<S: ToString>(&self, error: S) -> Result<char, Error> {
+        match self.position.current_char {
+            Some(c) => Ok(c),
+            None => Err(Error::new(
+                ErrorType::InvalidToken,
+                error.to_string(),
+                &self.position
+            ))
+        }
+    }
+
+    fn expect(&self, expected: char) -> Result<(), Error> {
+        match self.get_current_char(format!("Expected '{}'", expected)) {
+            Ok(c) => {
+                if c == expected {
+                    Ok(())
+                } else {
+                    Err(Error::new(
+                        ErrorType::InvalidToken,
+                        format!("Expected '{}', got {}", expected, c),
+                        &self.position
+                    ))
+                }
+            }
+            Err(e) => Err(e)
+        }
+    }
+
+    /// Try to make a string
+    fn make_string(&mut self) -> Result<Token, Error> {
+        let mut string = String::new();
+
+        self.expect('"')?;
+        self.position.advance();
+
+        while self.get_current_char("Unterminated string")? != '"' {
+            string.push(self.get_current_char("Unterminated string")?);
+            self.position.advance();
+        };
+
+        self.expect('"')?;
+        self.position.advance();
+
+        Ok(Token::new(TokenType::String(string), &self.position))
+    }
+
+    /// Peek at the next character in the lexer
     fn peek_char(&self) -> Option<char> {
         self.text.chars().nth(self.position.pos + 1)
     }
