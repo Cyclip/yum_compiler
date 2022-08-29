@@ -9,6 +9,7 @@ use nodes::{
     BinOpNode, 
     UnaryOpNode,
     VarAssignmentNode,
+    VarArithmeticAssignmentNode,
     VarAccessNode,
     IfExprNode,
     FuncDefNode,
@@ -252,16 +253,35 @@ impl Parser {
                 println!("Got identifier: {:?}", var_name_identifier);
 
                 // ensure the next token is an equals sign
-                self.expect(TokenType::Equal)?;
-                self.advance();
+                match self.get_current_token_err()?.value {
+                    TokenType::Equal => {
+                        // Variable assignment
+                        self.advance();
 
-                println!("Got equals sign");
+                        println!("Got equals sign");
 
-                // ensure the next token is an expression
-                let expr = self.gr_expr()?;
+                        // ensure the next token is an expression
+                        let expr = self.gr_expr()?;
 
-                println!("Got expression");
-                Ok(Node::VarAssignmentNode(Box::new(VarAssignmentNode::new(var_name_identifier, expr))))
+                        println!("Got expression");
+                        Ok(Node::VarAssignmentNode(Box::new(VarAssignmentNode::new(var_name_identifier, expr))))
+                    }
+
+                    TokenType::PlusEqual | TokenType::MinusEqual |
+                    TokenType::StarEqual | TokenType::SlashEqual => {
+                        // Variable assignment with operator
+                        let op_token = self.get_current_token_err()?;
+                        self.advance();
+
+                        let expr = self.gr_expr()?;
+                        Ok(Node::VarArithmeticAssignmentNode(Box::new(VarArithmeticAssignmentNode::new(var_name_identifier, op_token, expr))))
+                    },
+                    _ => Err(Error::new_parser_error(
+                        format!("Expected any equals sign, found {:?}", self.get_current_token_err()?.value),
+                        &self.get_current_token_err()?.position,
+                    ))
+                }
+                
             },
             _ => {
                 let mut left_node = self.gr_compare_expr()?;

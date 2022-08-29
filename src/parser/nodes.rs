@@ -14,6 +14,7 @@ pub enum Node {
     BinOpNode(Box<BinOpNode>),
     UnaryOpNode(Box<UnaryOpNode>),
     VarAssignmentNode(Box<VarAssignmentNode>),
+    VarArithmeticAssignmentNode(Box<VarArithmeticAssignmentNode>),
     VarAccessNode(Box<VarAccessNode>),
     IfExprNode(Box<IfExprNode>),
     FuncDefNode(Box<FuncDefNode>),
@@ -61,6 +62,14 @@ pub struct BinOpNode {
 #[derive(Debug)]
 pub struct VarAssignmentNode {
     identifier: Token,
+    value: Node,
+}
+
+/// Variable arithmetic assignment node
+#[derive(Debug)]
+pub struct VarArithmeticAssignmentNode {
+    identifier: Token,
+    op_token: Token,
     value: Node,
 }
 
@@ -147,6 +156,16 @@ impl VarAssignmentNode {
     pub fn new(identifier: Token, value: Node) -> VarAssignmentNode {
         VarAssignmentNode {
             identifier,
+            value,
+        }
+    }
+}
+
+impl VarArithmeticAssignmentNode {
+    pub fn new(identifier: Token, op_token: Token, value: Node) -> VarArithmeticAssignmentNode {
+        VarArithmeticAssignmentNode {
+            identifier,
+            op_token,
             value,
         }
     }

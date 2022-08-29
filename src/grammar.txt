@@ -4,7 +4,7 @@
                 ::= expr;
 
 <expr>          ::= let <identifier> = <expr>
-                ::= <identifier> = <expr>
+                ::= <identifier> ('=' | '+=' | '-=' | '*=' | '/=') <expr>
                 ::= <compare-expr> ((and | or) <compare-expr>)*
                 
 <compare-expr>  ::= (not) <compare-expr>

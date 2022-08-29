@@ -87,8 +87,6 @@ impl Lexer {
                 continue;
             }
 
-            println!("Current char is {}", current_char);
-
             // check for single-character tokens
             match current_char {
                 '(' => {
@@ -121,28 +119,56 @@ impl Lexer {
                     self.position.advance();
                     continue;
                 },
-                '-' => {
-                    tokens.push(Token::new(TokenType::Minus, &self.position));
-                    self.position.advance();
-                    continue;
-                },
-                '+' => {
-                    tokens.push(Token::new(TokenType::Plus, &self.position));
-                    self.position.advance();
-                    continue;
-                },
                 ';' => {
                     tokens.push(Token::new(TokenType::Semicolon, &self.position));
                     self.position.advance();
                     continue;
                 },
+                '+' => {
+                    if self.peek_char() == Some('=') {
+                        // arithmetic assignment operator
+                        tokens.push(Token::new(TokenType::PlusEqual, &self.position));
+                        // advance twice
+                        self.position.advance();
+                    } else {
+                        tokens.push(Token::new(TokenType::Plus, &self.position));
+                    }
+                    self.position.advance();
+                    continue;
+                },
+                '-' => {
+                    if self.peek_char() == Some('=') {
+                        // arithmetic assignment operator
+                        tokens.push(Token::new(TokenType::MinusEqual, &self.position));
+                        // advance twice
+                        self.position.advance();
+                    } else {
+                        tokens.push(Token::new(TokenType::Minus, &self.position));
+                    }
+                    self.position.advance();
+                    continue;
+                },
                 '*' => {
-                    tokens.push(Token::new(TokenType::Star, &self.position));
+                    if self.peek_char() == Some('=') {
+                        // arithmetic assignment operator
+                        tokens.push(Token::new(TokenType::StarEqual, &self.position));
+                        // advance twice
+                        self.position.advance();
+                    } else {
+                        tokens.push(Token::new(TokenType::Star, &self.position));
+                    }
                     self.position.advance();
                     continue;
                 },
                 '/' => {
-                    tokens.push(Token::new(TokenType::Slash, &self.position));
+                    if self.peek_char() == Some('=') {
+                        // arithmetic assignment operator
+                        tokens.push(Token::new(TokenType::SlashEqual, &self.position));
+                        // advance twice
+                        self.position.advance();
+                    } else {
+                        tokens.push(Token::new(TokenType::Slash, &self.position));
+                    }
                     self.position.advance();
                     continue;
                 },

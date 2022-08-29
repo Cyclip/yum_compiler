@@ -30,6 +30,8 @@ pub enum TokenType {
     Equal, EqualEqual,                                  // = ==
     Greater, GreaterEqual,                              // > >=
     Less, LessEqual,                                    // < <=
+    // Arithmetic assignment tokens
+    PlusEqual, MinusEqual, StarEqual, SlashEqual,       // += -= *= /=
 
     // Literals
     Integer(i32),                                       // 12345
