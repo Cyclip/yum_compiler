@@ -13,6 +13,9 @@ use nodes::{
     IfExprNode,
     FuncDefNode,
     FuncCallNode,
+    ListExprNode,
+    StatementsNode,
+    ReturnNode,
 };
 
 use crate::lexer::tokens::{Token, TokenType, Keyword, TokenPosition};
@@ -44,7 +47,7 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> GrammarOutput {
-        let res = self.gr_expr();
+        let res = self.gr_statements();
 
         if match self.get_current_token() {
             Some(token) => token.value != TokenType::EOF,
@@ -148,6 +151,66 @@ impl Parser {
     // ================ Grammar ================
     // Located in src/grammar.txt
     // =========================================
+
+    /// Statements
+    fn gr_statements(&mut self) -> GrammarOutput {
+        println!("Statements\t\t\t\t{:?}", self.get_current_token());
+        let mut statements: Vec<Node> = Vec::new();
+
+        while let Some(current_tok) = self.get_current_token() {
+            if [TokenType::EOF, TokenType::RightBrace, TokenType::RightParen, TokenType::RightSquare].contains(&current_tok.value) {
+                break;
+            } else {
+                println!("Getting statement from expression {:?}", self.get_current_token());
+                statements.push(self.gr_statement()?);
+
+            }
+        };
+
+        println!("Statements completed, returning {:?}", statements);
+        println!("Current token: {:?}", self.get_current_token());
+
+        Ok(Node::StatementsNode(Box::new(StatementsNode::new(statements))))
+    }
+
+    fn gr_statement(&mut self) -> GrammarOutput {
+        println!("Statement\t\t\t\t{:?}", self.get_current_token());
+        let current_tok = self.get_current_token_err()?;
+        let statement = match current_tok.value {
+            TokenType::Keyword(Keyword::Return) => {
+                // expecting return statement
+                println!("Expecting return statement");
+                self.advance();
+                
+                // next token may be semicolon or expression
+                let expr = match self.get_current_token_err()? {
+                    Token {
+                        value: TokenType::Semicolon,
+                        ..
+                    } => {
+                        // return statement with no expression
+                        println!("Return statement with no expression");
+                        self.advance();
+                        None
+                    }
+                    _ => {
+                        // return statement with expression
+                        println!("Return statement with expression");
+                        Some(self.gr_expr()?)
+                    }
+                };
+                
+                Ok(Node::ReturnNode(Box::new(ReturnNode::new(expr))))
+            }
+            _ => {
+                self.gr_expr()
+            }
+        };
+
+        self.expect(TokenType::Semicolon)?;
+        self.advance();
+        statement
+    }
 
     /// Expression
     fn gr_expr(&mut self) -> GrammarOutput {
@@ -400,6 +463,11 @@ impl Parser {
                         }
                     },
 
+                    TokenType::LeftSquare => {
+                        self.advance();
+                        self.gr_list_expr()
+                    }
+
                     // if it is an identifier, return a variable access node
                     TokenType::Identifier(_) => {
                         let var_access_node = VarAccessNode::new(token);
@@ -429,6 +497,25 @@ impl Parser {
 
             None => return Err(self.error_missing_token()),
         }
+    }
+
+    fn gr_list_expr(&mut self) -> GrammarOutput {
+        println!("List\t\t\t\t\t{:?}", self.get_current_token());
+        let mut elements = Vec::new();
+
+        while self.get_current_token_err()?.value != TokenType::RightSquare {
+            elements.push(self.gr_expr()?);
+
+            if self.get_current_token_err()?.value == TokenType::Comma {
+                self.advance();
+                continue;
+            }
+        }
+
+        self.expect(TokenType::RightSquare)?;
+        self.advance();
+
+        Ok(Node::ListExprNode(Box::new(ListExprNode::new(elements))))
     }
 
     /// If Expression
@@ -558,9 +645,11 @@ impl Parser {
             println!("Expecting empty expressionn");
             None
         } else {
-            println!("Expecting expression");
-            Some(self.gr_expr()?)
+            println!("Expecting statements");
+            Some(self.gr_statements()?)
         };
+
+        println!("Body for function: {:?}", body);
 
         self.expect(TokenType::RightBrace)?;
         self.advance();

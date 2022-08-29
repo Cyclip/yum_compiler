@@ -21,8 +21,9 @@ pub struct TokenPosition {
 pub enum TokenType {
     // Single-character tokens
     LeftParen, RightParen, LeftBrace, RightBrace,       // ( ) { }
+    LeftSquare, RightSquare,                            // [ ]
     Comma, Dot, Minus, Plus, Semicolon, Slash, Star,    // , . - + ; / *
-    Caret,                                              // ^
+    Caret, Underscore,                                  // ^ _
 
     // One or two character tokens
     Bang, BangEqual,                                    // ! !=
@@ -53,6 +54,7 @@ pub enum Keyword {
     Else,
     Elif,
     Func,
+    Return,
 }
 
 impl Keyword {
@@ -66,6 +68,7 @@ impl Keyword {
             "else" => Some(Keyword::Else),
             "elif" => Some(Keyword::Elif),
             "func" => Some(Keyword::Func),
+            "return" => Some(Keyword::Return),
             _ => None,
         }
     }

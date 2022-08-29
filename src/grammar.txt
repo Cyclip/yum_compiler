@@ -1,4 +1,10 @@
-<expr>          ::= var <identifier> = <expr>
+<statements>    ::= <statement> (<statement>)*
+
+<statement>     ::= return <expr>?;
+                ::= expr;
+
+<expr>          ::= let <identifier> = <expr>
+                ::= <identifier> = <expr>
                 ::= <compare-expr> ((and | or) <compare-expr>)*
                 
 <compare-expr>  ::= (not) <compare-expr>
@@ -8,19 +14,22 @@
 
 <term>          ::= <factor> (('*' | '/') <factor>)*
 
-<factor>        ::= call (^ <factor>)*
+<factor>        ::= call ('^' <factor>)*
 
 <call>          ::= atom (<expr> (',' <expr>)* )?
 
 <atom>          ::= INT/LONGINT/FLOAT/DOUBLE
                 ::= ('+' | '-') <atom>
-                ::= ( <expr> )
-                ::= " STRING "
+                ::= '(' <expr> ')'
+                ::= '"' STRING '"'
+                ::= <list-expr>
                 ::= <if-expr>
                 ::= <func-def>
+
+<list-expr>     ::= '[' (<expr> (',' <expr>)* )? ']'
 
 <if-expr>       ::= if <expr> { <expr> }
                         (elif { <expr> })*
                         (else { <expr> })?
 
-<func-def>      ::= func <identifier>( (<identifier> (',' <identifier>)* )? ) { expr }
+<func-def>      ::= func <identifier>( (<identifier> (',' <identifier>)* )? ) { statements }

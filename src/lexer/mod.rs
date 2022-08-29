@@ -57,8 +57,14 @@ impl LexerPosition {
 
     pub fn advance(&mut self) {
         self.pos += 1;
-        self.column += 1;
         self.current_char = self.text.chars().nth(self.pos);
+
+        if self.current_char == Some('\n') {
+            self.line += 1;
+            self.column = 0;
+        } else {
+            self.column += 1;
+        }
     }
 }
 
@@ -168,6 +174,21 @@ impl Lexer {
                 '"' => {
                     let token = self.make_string()?;
                     tokens.push(token);
+                    continue;
+                },
+                '[' => {
+                    tokens.push(Token::new(TokenType::LeftSquare, &self.position));
+                    self.position.advance();
+                    continue;
+                },
+                ']' => {
+                    tokens.push(Token::new(TokenType::RightSquare, &self.position));
+                    self.position.advance();
+                    continue;
+                },
+                '_' => {
+                    tokens.push(Token::new(TokenType::Underscore, &self.position));
+                    self.position.advance();
                     continue;
                 }
                 _ => (),
@@ -325,7 +346,7 @@ impl Lexer {
                 break;
             }
 
-            if self.is_letter(current_char) {
+            if self.is_letter(current_char) || current_char == '_' {
                 identifier.push(current_char);
                 self.position.advance();
                 continue;

@@ -1,7 +1,8 @@
 //! Different nodes within the AST to be interpreted
+#![allow(dead_code)]
 
 use crate::{
-    lexer::{tokens::{Token, TokenType}, LexerPosition}, 
+    lexer::tokens::Token, 
 };
 
 // ======================== Base Node Enum ========================
@@ -17,9 +18,18 @@ pub enum Node {
     IfExprNode(Box<IfExprNode>),
     FuncDefNode(Box<FuncDefNode>),
     FuncCallNode(Box<FuncCallNode>),
+    ListExprNode(Box<ListExprNode>),
+    StatementsNode(Box<StatementsNode>),
+    ReturnNode(Box<ReturnNode>),
 }
 
 // =========================== All nodes ===========================
+/// Statements node
+#[derive(Debug)]
+pub struct StatementsNode {
+    pub statements: Vec<Node>,
+}
+
 /// Number (int/float) node
 #[derive(Debug)]
 pub struct NumberNode {
@@ -83,7 +93,25 @@ pub struct FuncCallNode {
     args: Vec<Node>,
 }
 
+/// List expression node
+#[derive(Debug)]
+pub struct ListExprNode {
+    elements: Vec<Node>,
+}
+
+/// Return statement node
+#[derive(Debug)]
+pub struct ReturnNode {
+    value: Option<Node>,
+}
+
 // =========================== Node impl ===========================
+impl StatementsNode {
+    pub fn new(statements: Vec<Node>) -> StatementsNode {
+        StatementsNode { statements }
+    }
+}
+
 impl NumberNode {
     pub fn new(token: Token) -> NumberNode {
         NumberNode { token }
@@ -155,6 +183,22 @@ impl FuncCallNode {
         FuncCallNode {
             func_node,
             args,
+        }
+    }
+}
+
+impl ListExprNode {
+    pub fn new(elements: Vec<Node>) -> ListExprNode {
+        ListExprNode {
+            elements,
+        }
+    }
+}
+
+impl ReturnNode {
+    pub fn new(value: Option<Node>) -> ReturnNode {
+        ReturnNode {
+            value: value,
         }
     }
 }
