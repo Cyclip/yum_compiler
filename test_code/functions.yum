@@ -2,3 +2,8 @@ func incr(x) {
     let x += 1;
     return x;
 };
+
+let a = 3;
+let b = incr(a);
+
+assert b == a + 1;

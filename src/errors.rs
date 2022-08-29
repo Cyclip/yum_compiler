@@ -16,6 +16,8 @@ pub enum ErrorType {
     SyntaxError,
     InvalidToken,
     ParserError,
+    InvalidSyntax,
+    AssertError,
 }
 
 impl Error {
@@ -32,6 +34,21 @@ impl Error {
             error_type: ErrorType::ParserError,
             error_message,
             position: position.clone(),
+        }
+    }
+
+    pub fn new_runtime(error_type: ErrorType, error_message: String, position: Option<&TokenPosition>) -> Error {
+        let position = match position {
+            Some(position) => position.clone(),
+            None => TokenPosition {
+                line: 0,
+                column: 0,
+            },
+        };
+        Error {
+            error_type,
+            error_message,
+            position,
         }
     }
 }

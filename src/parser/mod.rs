@@ -17,10 +17,11 @@ use nodes::{
     ListExprNode,
     StatementsNode,
     ReturnNode,
+    AssertNode,
 };
 
-use crate::lexer::tokens::{Token, TokenType, Keyword, TokenPosition};
-use crate::errors::{Error, ErrorType};
+use crate::lexer::tokens::{Token, TokenType, Keyword};
+use crate::errors::{Error};
 
 /// Parses the tokens into an AST
 pub struct Parser {
@@ -100,6 +101,7 @@ impl Parser {
     }
 
     /// Peek at the next token in the stream
+    #[allow(dead_code)]
     fn peek_token(&self) -> Result<Token, Error> {
         match Parser::try_get_token(&self.tokens, self.token_index + 1) {
             Some(token) => Ok(token),
@@ -283,6 +285,15 @@ impl Parser {
                 }
                 
             },
+
+            TokenType::Keyword(Keyword::Assert) => {
+                // expecting assert statement
+                self.advance();
+
+                let expr = self.gr_expr()?;
+                Ok(Node::AssertNode(Box::new(AssertNode::new(expr))))
+            }
+
             _ => {
                 let mut left_node = self.gr_compare_expr()?;
 
@@ -401,7 +412,7 @@ impl Parser {
     /// Call
     fn gr_call(&mut self) -> GrammarOutput {
         println!("Call\t\t\t\t\t{:?}", self.get_current_token());
-        let mut left_node = self.gr_atom()?;
+        let left_node = self.gr_atom()?;
 
         let current_tok = self.get_current_token_err()?;
 

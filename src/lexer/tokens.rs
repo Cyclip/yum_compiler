@@ -57,6 +57,7 @@ pub enum Keyword {
     Elif,
     Func,
     Return,
+    Assert,
 }
 
 impl Keyword {
@@ -71,6 +72,7 @@ impl Keyword {
             "elif" => Some(Keyword::Elif),
             "func" => Some(Keyword::Func),
             "return" => Some(Keyword::Return),
+            "assert" => Some(Keyword::Assert),
             _ => None,
         }
     }
