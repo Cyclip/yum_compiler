@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit, get_name_as_string};
-use crate::lexer::tokens::TokenType;
+use crate::{lexer::tokens::TokenType, interpreter::symbols::SymbolType};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -43,6 +43,6 @@ impl NodeVisit for VarArithmeticAssignmentNode {
 
         // perform the operation and assign
         symbol_table.set(identifier_string, left_symbol.add(&right_symbol)?);
-        Ok(Symbol::None)
+        Ok(Symbol::new(SymbolType::None, self.get_position()))
     }
 }

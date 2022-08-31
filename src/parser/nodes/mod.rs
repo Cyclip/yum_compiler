@@ -90,9 +90,9 @@ impl NodeVisit for Node {
             Node::FuncDefNode(node) => node.visit(symbol_table),
             Node::FuncCallNode(node) => node.visit(symbol_table),
             Node::ListExprNode(node) => node.visit(symbol_table),
-            Node::StatementsNode(node) => node.visit(symbol_table),
             Node::ReturnNode(node) => node.visit(symbol_table),
             Node::AssertNode(node) => node.visit(symbol_table),
+            Node::StatementsNode(node) => panic!("Cannot visit statements node"),
         }
     }
 
@@ -109,9 +109,9 @@ impl NodeVisit for Node {
             Node::FuncDefNode(node) => node.get_position(),
             Node::FuncCallNode(node) => node.get_position(),
             Node::ListExprNode(node) => node.get_position(),
-            Node::StatementsNode(node) => node.get_position(),
             Node::ReturnNode(node) => node.get_position(),
             Node::AssertNode(node) => node.get_position(),
+            Node::StatementsNode(node) => panic!("Cannot visit statements node"),
         }
     }
 }

@@ -1,6 +1,5 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit, get_name_as_string};
-use crate::lexer::tokens::TokenType;
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 

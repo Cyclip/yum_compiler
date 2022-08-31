@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
-use crate::lexer::tokens::TokenType;
+use crate::{lexer::tokens::{TokenType, Keyword}, interpreter::symbols::SymbolType};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -24,14 +24,15 @@ impl NodeVisit for UnaryOpNode {
     fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         let right_symbol = self.right.visit(symbol_table)?;
         match self.token.value {
-            TokenType::Not => {
-                match right_symbol {
-                    Symbol::Boolean(b) => Ok(Symbol::Boolean(!b)),
+            TokenType::Keyword(Keyword::Not) => {
+                match right_symbol.value {
+                    SymbolType::Integer(1) => Ok(Symbol::new(SymbolType::Integer(0), self.get_position())),
+                    SymbolType::Integer(0) => Ok(Symbol::new(SymbolType::Integer(1), self.get_position())),
                     _ => Err(Error::new_runtime(
-                        ErrorType::TypeError, 
-                        "Expected boolean".to_string(), 
-                        &self.token.position
-                    ))
+                        ErrorType::InvalidOperation,
+                        format!("Invalid operation '{:?}'", self.token.value),
+                        &self.token.position,
+                    )),
                 }
             }
 

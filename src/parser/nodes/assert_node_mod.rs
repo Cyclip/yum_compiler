@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
-use crate::{interpreter::symbol_table::SymbolTable, lexer::tokens::TokenPosition};
+use crate::{interpreter::{symbol_table::SymbolTable, symbols::SymbolType}, lexer::tokens::TokenPosition};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -22,9 +22,9 @@ impl NodeVisit for AssertNode {
     fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error> {
         let condition_symbol = self.condition.visit(symbol_table)?;
         
-        match condition_symbol {
-            Symbol::Integer(value) => {
-                if value == 0 { 
+        match condition_symbol.value {
+            SymbolType::Integer(value) => {
+                if value == 0 {
                     return Err(Error::new_runtime(
                         ErrorType::AssertError, 
                         "Assertion failed".to_string(), 

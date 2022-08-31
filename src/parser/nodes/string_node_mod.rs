@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
-use crate::lexer::tokens::TokenType;
+use crate::{lexer::tokens::TokenType, interpreter::symbols::SymbolType};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -19,7 +19,7 @@ impl StringNode {
 impl NodeVisit for StringNode {
     fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         match self.token.value {
-            TokenType::String(s) => Ok(Symbol::String(s)),
+            TokenType::String(s) => Ok(Symbol::new(SymbolType::String(s), self.get_position())),
             _ => Err(Error::new_runtime(
                 ErrorType::TypeError, 
                 "Expected string".to_string(), 

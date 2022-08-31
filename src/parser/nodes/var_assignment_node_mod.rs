@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit, get_name_as_string};
+use crate::interpreter::symbols::SymbolType;
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -30,6 +31,6 @@ impl NodeVisit for VarAssignmentNode {
         let value = self.value.visit(symbol_table)?;
 
         symbol_table.set(identifier_string, value);
-        Ok(Symbol::None)
+        Ok(Symbol::new(SymbolType::None, self.get_position()))
     }
 }

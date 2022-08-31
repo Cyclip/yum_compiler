@@ -1,22 +1,19 @@
-use crate::parser::nodes::Node;
+use crate::{parser::nodes::Node, errors::Error, lexer::tokens::TokenPosition};
 
 /// All the symbols that can be stored in the symbol table
 #[derive(Debug, Clone)]
-pub enum Symbol {
+pub struct Symbol {
+    pub value: SymbolType,
+    pub position: TokenPosition,
+}
+
+#[derive(Debug, Clone)]
+pub enum SymbolType {
     Integer(i32),
     Float(f32),
     String(String),
     Node(Node),
     Function(FunctionSymbol),
-    None,
-}
-
-pub enum SymbolType {
-    Integer,
-    Float,
-    String,
-    Node,
-    Function,
     None,
 }
 
@@ -28,14 +25,10 @@ pub struct FunctionSymbol {
 }
 
 impl Symbol {
-    pub fn get_type(&self) -> SymbolType {
-        match self {
-            Symbol::Integer(_) => SymbolType::Integer,
-            Symbol::Float(_) => SymbolType::Float,
-            Symbol::String(_) => SymbolType::String,
-            Symbol::Node(_) => SymbolType::Node,
-            Symbol::Function(_) => SymbolType::Function,
-            Symbol::None => SymbolType::None,
+    pub fn new(value: SymbolType, position: TokenPosition) -> Symbol {
+        Symbol {
+            value,
+            position,
         }
     }
 }
