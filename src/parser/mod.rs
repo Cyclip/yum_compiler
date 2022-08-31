@@ -55,7 +55,7 @@ impl Parser {
             Some(token) => token.value != TokenType::EOF,
             None => true,
         } {
-            return Err(Error::new_parser_error(
+            return Err(Error::new_parser(
                 format!("Unexpected token: {:?}, expected EOF", self.get_current_token().unwrap().value),
                 &self.get_current_token_err()?.position,
             ));
@@ -126,7 +126,7 @@ impl Parser {
     /// token but does not find it. Reduces repeating
     /// code.
     fn error_missing_token(&self) -> Error {
-        Error::new_parser_error(
+        Error::new_parser(
             "Expected token".to_string(),
             &self.get_last_token().position,
         )
@@ -141,7 +141,7 @@ impl Parser {
                 if token.value == token_type {
                     Ok(())
                 } else {
-                    Err(Error::new_parser_error(
+                    Err(Error::new_parser(
                         format!("Expected {:?}", token_type),
                         &token.position,
                     ))
@@ -240,7 +240,7 @@ impl Parser {
                             },
                             _ => {
                                 // token is not an identifier
-                                return Err(Error::new_parser_error(
+                                return Err(Error::new_parser(
                                     format!("Expected identifier, found {:?}", token.value),
                                     &token.position,
                                 ));
@@ -278,7 +278,7 @@ impl Parser {
                         let expr = self.gr_expr()?;
                         Ok(Node::VarArithmeticAssignmentNode(Box::new(VarArithmeticAssignmentNode::new(var_name_identifier, op_token, expr))))
                     },
-                    _ => Err(Error::new_parser_error(
+                    _ => Err(Error::new_parser(
                         format!("Expected any equals sign, found {:?}", self.get_current_token_err()?.value),
                         &self.get_current_token_err()?.position,
                     ))
@@ -482,7 +482,7 @@ impl Parser {
                                     self.advance();
                                     Ok(expr)
                                 } else {
-                                    Err(Error::new_parser_error(
+                                    Err(Error::new_parser(
                                         format!("Expected ')', got {:?}", token.value),
                                         &token.position,
                                     ))
@@ -519,7 +519,7 @@ impl Parser {
                     }
 
                     // if no matches, return an error
-                    _ => Err(Error::new_parser_error(
+                    _ => Err(Error::new_parser(
                         format!("Expected atom, found {:?}", token.value),
                         &token.position,
                     )),
@@ -619,7 +619,7 @@ impl Parser {
         let current_tok = self.get_current_token_err()?;
         let identifier = match current_tok.value {
             TokenType::Identifier(_) => current_tok,
-            _ => return Err(Error::new_parser_error(
+            _ => return Err(Error::new_parser(
                 format!("Expected identifier, got {:?}", self.get_current_token_err()?.value),
                 &self.get_current_token_err()?.position,
             )),
@@ -655,7 +655,7 @@ impl Parser {
                     self.advance();
                 },
                 _ => {
-                    return Err(Error::new_parser_error(
+                    return Err(Error::new_parser(
                         format!("Expected identifier, got {:?}", self.get_current_token_err()?.value),
                         &self.get_current_token_err()?.position,
                     ))

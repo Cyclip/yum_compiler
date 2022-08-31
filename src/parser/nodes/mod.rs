@@ -32,15 +32,15 @@ pub use return_node_mod::ReturnNode;
 pub use assert_node_mod::AssertNode;
 
 use crate::{
-    errors::Error, 
+    errors::{Error, ErrorType}, 
     interpreter::{
         symbols::Symbol,
         symbol_table::SymbolTable,
-    },
+    }, lexer::tokens::{TokenPosition, TokenType, Token},
 };
 
 /// Base node enum
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Node {
     NumberNode(Box<NumberNode>),
     StringNode(Box<StringNode>), 
@@ -61,6 +61,19 @@ pub enum Node {
 /// Trait for the node to be able to be visited (evaluated)
 pub trait NodeVisit {
     fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error>;
+    fn get_position(&self) -> TokenPosition;
+}
+
+/// Function to get the name of an identifier as a String
+fn get_name_as_string(identifier: Token) -> Result<String, Error> {
+    match identifier.value {
+        TokenType::Identifier(s) => Ok(s),
+        _ => Err(Error::new_runtime(
+            ErrorType::TypeError, 
+            "Expected identifier".to_string(), 
+            &identifier.position
+        ))
+    }
 }
 
 impl NodeVisit for Node {
@@ -80,6 +93,25 @@ impl NodeVisit for Node {
             Node::StatementsNode(node) => node.visit(symbol_table),
             Node::ReturnNode(node) => node.visit(symbol_table),
             Node::AssertNode(node) => node.visit(symbol_table),
+        }
+    }
+
+    fn get_position(&self) -> TokenPosition {
+        match self {
+            Node::NumberNode(node) => node.get_position(),
+            Node::StringNode(node) => node.get_position(),
+            Node::BinOpNode(node) => node.get_position(),
+            Node::UnaryOpNode(node) => node.get_position(),
+            Node::VarAssignmentNode(node) => node.get_position(),
+            Node::VarArithmeticAssignmentNode(node) => node.get_position(),
+            Node::VarAccessNode(node) => node.get_position(),
+            Node::IfExprNode(node) => node.get_position(),
+            Node::FuncDefNode(node) => node.get_position(),
+            Node::FuncCallNode(node) => node.get_position(),
+            Node::ListExprNode(node) => node.get_position(),
+            Node::StatementsNode(node) => node.get_position(),
+            Node::ReturnNode(node) => node.get_position(),
+            Node::AssertNode(node) => node.get_position(),
         }
     }
 }

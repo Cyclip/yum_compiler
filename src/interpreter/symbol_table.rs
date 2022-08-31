@@ -28,7 +28,7 @@ impl SymbolTable {
 
     /// Insert a new identifier into the symbol table
     /// If the identifier already exists, it will be overwritten
-    pub fn insert(&mut self, name: String, symbol: Symbol) {
+    pub fn set(&mut self, name: String, symbol: Symbol) {
         self.symbols.insert(name, symbol);
     }
 

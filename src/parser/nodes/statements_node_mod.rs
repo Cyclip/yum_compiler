@@ -4,7 +4,8 @@ use super::{Node, NodeVisit};
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
 /// Statements node
-#[derive(Debug)]
+/// Does not implement node visit because it is not a real node
+#[derive(Debug, Clone)]
 pub struct StatementsNode {
     pub statements: Vec<Node>,
 }

@@ -4,7 +4,7 @@ use super::{Node, NodeVisit};
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
 /// Return statement node
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ReturnNode {
     pub value: Option<Node>,
 }
@@ -17,3 +17,12 @@ impl ReturnNode {
     }
 }
 
+impl NodeVisit for ReturnNode {
+    fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+        unimplemented!()
+    }
+
+    fn get_position(&self) -> crate::lexer::tokens::TokenPosition {
+        self.value.as_ref().unwrap().get_position()
+    }
+}

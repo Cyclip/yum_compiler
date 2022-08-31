@@ -235,7 +235,7 @@ impl Lexer {
             }
 
             // invalid token
-            return Err(Error::new(
+            return Err(Error::new_lexer(
                 ErrorType::InvalidToken,
                 format!("Unexpected character: '{}'", current_char),
                 &self.position
@@ -250,7 +250,7 @@ impl Lexer {
     fn get_current_char<S: ToString>(&self, error: S) -> Result<char, Error> {
         match self.position.current_char {
             Some(c) => Ok(c),
-            None => Err(Error::new(
+            None => Err(Error::new_lexer(
                 ErrorType::InvalidToken,
                 error.to_string(),
                 &self.position
@@ -264,7 +264,7 @@ impl Lexer {
                 if c == expected {
                     Ok(())
                 } else {
-                    Err(Error::new(
+                    Err(Error::new_lexer(
                         ErrorType::InvalidToken,
                         format!("Expected '{}', got {}", expected, c),
                         &self.position
@@ -379,7 +379,7 @@ impl Lexer {
             } else if self.is_digit(current_char) {
                 // ensure it is not the first character
                 if identifier.is_empty() {
-                    return Err(Error::new(
+                    return Err(Error::new_lexer(
                         ErrorType::InvalidToken,
                         format!("Unexpected character: '{}'", current_char),
                         &self.position
@@ -419,7 +419,7 @@ impl Lexer {
                 self.position.advance();
             } else if current_char == '.' {
                 if dot_count > 0 {
-                    return Err(Error::new(
+                    return Err(Error::new_lexer(
                         ErrorType::SyntaxError,
                         "Number cannot have more than one decimal point".to_string(),
                         &self.position

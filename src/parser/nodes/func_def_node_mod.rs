@@ -1,10 +1,12 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
+use crate::lexer::tokens::TokenPosition;
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
+use crate::interpreter::symbol_table::SymbolTable;
 
 /// Function definition node
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FuncDefNode {
     pub identifier: Token,
     pub parameters: Vec<Token>,
@@ -21,3 +23,12 @@ impl FuncDefNode {
     }
 }
 
+impl NodeVisit for FuncDefNode {
+    fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error> {
+        unimplemented!()
+    }
+    
+    fn get_position(&self) -> TokenPosition {
+        self.identifier.position
+    }
+}

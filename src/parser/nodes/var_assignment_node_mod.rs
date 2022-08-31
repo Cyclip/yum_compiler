@@ -1,10 +1,10 @@
 #[allow(unused_imports)]
-use super::{Node, NodeVisit};
+use super::{Node, NodeVisit, get_name_as_string};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
 /// Variable assignment node
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VarAssignmentNode {
     pub identifier: Token,
     pub value: Node,
@@ -19,3 +19,17 @@ impl VarAssignmentNode {
     }
 }
 
+impl NodeVisit for VarAssignmentNode {
+    fn get_position(&self) -> crate::lexer::tokens::TokenPosition {
+        self.identifier.position
+    }
+
+    fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+        let identifier_string = get_name_as_string(self.identifier)?;
+
+        let value = self.value.visit(symbol_table)?;
+
+        symbol_table.set(identifier_string, value);
+        Ok(Symbol::None)
+    }
+}

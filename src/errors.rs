@@ -18,10 +18,15 @@ pub enum ErrorType {
     ParserError,
     InvalidSyntax,
     AssertError,
+    InvalidOperation,
+    Exception,
+    TypeError,
+    UndefinedVariable,
 }
 
 impl Error {
-    pub fn new(error_type: ErrorType, error_message: String, position: &LexerPosition) -> Error {
+    /// New lexer error
+    pub fn new_lexer(error_type: ErrorType, error_message: String, position: &LexerPosition) -> Error {
         Error {
             error_type,
             error_message,
@@ -29,7 +34,8 @@ impl Error {
         }
     }
 
-    pub fn new_parser_error(error_message: String, position: &TokenPosition) -> Error {
+    /// New parser error
+    pub fn new_parser(error_message: String, position: &TokenPosition) -> Error {
         Error {
             error_type: ErrorType::ParserError,
             error_message,
@@ -37,18 +43,12 @@ impl Error {
         }
     }
 
-    pub fn new_runtime(error_type: ErrorType, error_message: String, position: Option<&TokenPosition>) -> Error {
-        let position = match position {
-            Some(position) => position.clone(),
-            None => TokenPosition {
-                line: 0,
-                column: 0,
-            },
-        };
+    /// New runtime error
+    pub fn new_runtime(error_type: ErrorType, error_message: String, position: &TokenPosition) -> Error {
         Error {
             error_type,
             error_message,
-            position,
+            position: position.clone(),
         }
     }
 }
