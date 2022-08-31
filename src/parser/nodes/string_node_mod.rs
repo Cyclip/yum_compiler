@@ -17,7 +17,7 @@ impl StringNode {
 }
 
 impl NodeVisit for StringNode {
-    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, _symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         match self.token.value.clone() {
             TokenType::String(s) => Ok(Symbol::new(SymbolType::String(s), self.get_position())),
             _ => Err(Error::new_runtime(

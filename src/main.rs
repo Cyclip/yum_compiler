@@ -19,6 +19,11 @@ fn compile(source: String) -> Result<Node, Error> {
     ast
 }
 
+fn run(ast: Node) -> Result<(), Error> {
+    let mut interpreter = interpreter::Interpreter::new();
+    interpreter.run(ast)
+}
+
 fn main() {
     let filename = match env::args().nth(1) {
         Some(filename) => filename,
@@ -45,4 +50,13 @@ fn main() {
     };
 
     println!("{:#?}", ast);
+
+    // run
+    match run(ast) {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
 }

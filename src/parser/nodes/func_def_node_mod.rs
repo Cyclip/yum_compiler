@@ -24,7 +24,7 @@ impl FuncDefNode {
 }
 
 impl NodeVisit for FuncDefNode {
-    fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, _symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         unimplemented!()
     }
     

@@ -18,7 +18,7 @@ impl ListExprNode {
 }
 
 impl NodeVisit for ListExprNode {
-    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, _symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         unimplemented!()
     }
 

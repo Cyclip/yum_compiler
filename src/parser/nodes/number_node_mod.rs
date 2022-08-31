@@ -17,7 +17,7 @@ impl NumberNode {
 }
 
 impl NodeVisit for NumberNode {
-    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, _symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         match self.token.value {
             TokenType::Integer(i) => Ok(Symbol::new(SymbolType::Integer(i), self.get_position())),
             TokenType::Float(f) => Ok(Symbol::new(SymbolType::Float(f), self.get_position())),

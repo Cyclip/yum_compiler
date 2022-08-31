@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
-use crate::{lexer::tokens::{TokenType, Keyword}, interpreter::symbols::SymbolType};
+use crate::{lexer::tokens::{TokenType, Keyword}};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
