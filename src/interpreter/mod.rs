@@ -27,7 +27,7 @@ impl Interpreter {
 
         // run all statements in order
         for statement in statements.statements {
-            statement.visit()?;
+            statement.visit(&mut self.symbol_table)?;
         }
 
         Ok(())

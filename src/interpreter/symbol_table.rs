@@ -7,6 +7,7 @@ use std::collections::HashMap;
 
 use super::symbols::Symbol;
 
+#[derive(Clone)]
 pub struct SymbolTable {
     pub parent: Option<Box<SymbolTable>>,
     pub symbols: HashMap<String, Symbol>,
@@ -36,8 +37,8 @@ impl SymbolTable {
     /// If it is not found, it will search the parent symbol table
     /// If it is not found in any symbol tables up to the global symbol table,
     /// it will return None
-    pub fn get(&self, identifier: String) -> Option<Symbol> {
-        match self.symbols.get(&identifier) {
+    pub fn get(&self, identifier: &String) -> Option<Symbol> {
+        match self.symbols.get(identifier) {
             Some(symbol) => Some(symbol.clone()),
             None => match &self.parent {
                 Some(parent) => parent.get(identifier),

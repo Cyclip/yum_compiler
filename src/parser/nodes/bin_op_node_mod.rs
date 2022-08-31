@@ -23,24 +23,24 @@ impl BinOpNode {
 }
 
 impl NodeVisit for BinOpNode {
-    fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         let left_symbol = self.left_node.visit(symbol_table)?;
         let right_symbol = self.right_node.visit(symbol_table)?;
-        let op_token = self.op_token;
+        let op_token = self.op_token.clone();
         let result = match op_token.value {
-            TokenType::Plus => left_symbol.add(&right_symbol),
-            TokenType::Minus => left_symbol.sub(&right_symbol),
-            TokenType::Star => left_symbol.mul(&right_symbol),
-            TokenType::Slash => left_symbol.div(&right_symbol),
-            TokenType::Caret => left_symbol.power(&right_symbol),
-            TokenType::Less => left_symbol.lt(&right_symbol),
-            TokenType::LessEqual => left_symbol.le(&right_symbol),
-            TokenType::Greater => left_symbol.gt(&right_symbol),
-            TokenType::GreaterEqual => left_symbol.ge(&right_symbol),
-            TokenType::EqualEqual => left_symbol.eq(&right_symbol),
-            TokenType::BangEqual => left_symbol.ne(&right_symbol),
-            TokenType::Keyword(Keyword::And) => left_symbol.and(&right_symbol),
-            TokenType::Keyword(Keyword::Or) => left_symbol.or(&right_symbol),
+            TokenType::Plus => left_symbol.add(&right_symbol)?,
+            TokenType::Minus => left_symbol.sub(&right_symbol)?,
+            TokenType::Star => left_symbol.mul(&right_symbol)?,
+            TokenType::Slash => left_symbol.div(&right_symbol)?,
+            TokenType::Caret => left_symbol.power(&right_symbol)?,
+            TokenType::Less => left_symbol.lt(&right_symbol)?,
+            TokenType::LessEqual => left_symbol.le(&right_symbol)?,
+            TokenType::Greater => left_symbol.gt(&right_symbol)?,
+            TokenType::GreaterEqual => left_symbol.ge(&right_symbol)?,
+            TokenType::EqualEqual => left_symbol.eq(&right_symbol)?,
+            TokenType::BangEqual => left_symbol.ne(&right_symbol)?,
+            TokenType::Keyword(Keyword::And) => left_symbol.and(&right_symbol)?,
+            TokenType::Keyword(Keyword::Or) => left_symbol.or(&right_symbol)?,
             _ => {
                 return Err(Error::new_runtime(
                     ErrorType::InvalidOperation,

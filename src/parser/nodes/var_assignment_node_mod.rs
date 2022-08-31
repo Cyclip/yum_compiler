@@ -25,8 +25,8 @@ impl NodeVisit for VarAssignmentNode {
         self.identifier.position
     }
 
-    fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
-        let identifier_string = get_name_as_string(self.identifier)?;
+    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+        let identifier_string = get_name_as_string(self.identifier.clone())?;
 
         let value = self.value.visit(symbol_table)?;
 

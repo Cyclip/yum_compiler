@@ -21,24 +21,14 @@ impl UnaryOpNode {
 }
 
 impl NodeVisit for UnaryOpNode {
-    fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         let right_symbol = self.right.visit(symbol_table)?;
         match self.token.value {
-            TokenType::Keyword(Keyword::Not) => {
-                match right_symbol.value {
-                    SymbolType::Integer(1) => Ok(Symbol::new(SymbolType::Integer(0), self.get_position())),
-                    SymbolType::Integer(0) => Ok(Symbol::new(SymbolType::Integer(1), self.get_position())),
-                    _ => Err(Error::new_runtime(
-                        ErrorType::InvalidOperation,
-                        format!("Invalid operation '{:?}'", self.token.value),
-                        &self.token.position,
-                    )),
-                }
-            }
+            TokenType::Keyword(Keyword::Not) => {Ok(right_symbol.not()?)}
 
             TokenType::Plus => Ok(right_symbol),
 
-            TokenType::Minus => Ok(right_symbol.neg()),
+            TokenType::Minus => Ok(right_symbol.neg()?),
 
             _ => Err(Error::new_runtime(
                 ErrorType::TypeError, 

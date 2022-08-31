@@ -19,7 +19,7 @@ impl AssertNode {
 }
 
 impl NodeVisit for AssertNode {
-    fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         let condition_symbol = self.condition.visit(symbol_table)?;
         
         match condition_symbol.value {

@@ -23,12 +23,12 @@ impl IfExprNode {
 }
 
 impl NodeVisit for IfExprNode {
-    fn visit(&self, symbol_table: crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
         let condition_symbol = self.condition.visit(symbol_table)?;
         match condition_symbol.value {
             SymbolType::Integer(value) => {
                 if value == 0 {
-                    match self.if_false {
+                    match self.if_false.clone() {
                         Some(if_false) => return if_false.visit(symbol_table),
                         None => return Ok(Symbol::new(SymbolType::None, self.get_position())),
                     }

@@ -1,4 +1,4 @@
-use crate::{parser::nodes::Node, errors::Error, lexer::tokens::TokenPosition};
+use crate::{parser::nodes::Node, lexer::tokens::TokenPosition};
 
 /// All the symbols that can be stored in the symbol table
 #[derive(Debug, Clone)]

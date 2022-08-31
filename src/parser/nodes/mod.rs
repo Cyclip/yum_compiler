@@ -60,7 +60,7 @@ pub enum Node {
 
 /// Trait for the node to be able to be visited (evaluated)
 pub trait NodeVisit {
-    fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error>;
+    fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error>;
     fn get_position(&self) -> TokenPosition;
 }
 
@@ -77,7 +77,7 @@ fn get_name_as_string(identifier: Token) -> Result<String, Error> {
 }
 
 impl NodeVisit for Node {
-    fn visit(&self, symbol_table: SymbolTable) -> Result<Symbol, Error> {
+    fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         match self {
             Node::NumberNode(node) => node.visit(symbol_table),
             Node::StringNode(node) => node.visit(symbol_table),

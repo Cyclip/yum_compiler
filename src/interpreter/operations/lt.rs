@@ -6,7 +6,7 @@ use super::super::symbols::{Symbol, SymbolType};
 
 impl Symbol {
     pub fn lt(&self, other: &Symbol) -> Result<Symbol, Error> {
-        match (self.value, other.value) {
+        match (self.value.clone(), other.value.clone()) {
             (SymbolType::Integer(a), SymbolType::Integer(b)) => Ok(Symbol::new(SymbolType::Integer(bool_to_int(a < b)), self.position)),
             (SymbolType::Float(a), SymbolType::Float(b)) => Ok(Symbol::new(SymbolType::Integer(bool_to_int(a < b)), self.position)),
             (SymbolType::Integer(a), SymbolType::Float(b)) => Ok(Symbol::new(SymbolType::Integer(bool_to_int((a as f32) < b)), self.position)),
