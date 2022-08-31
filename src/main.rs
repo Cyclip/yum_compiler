@@ -49,14 +49,11 @@ fn main() {
         }
     };
 
-    println!("{:#?}", ast);
+    // println!("{:#?}", ast);
 
     // run
     match run(ast) {
-        Ok(_) => (),
-        Err(e) => {
-            println!("{}", e);
-            return;
-        }
+        Ok(_) => println!("Program finished successfully"),
+        Err(e) => println!("{}", e)
     };
 }

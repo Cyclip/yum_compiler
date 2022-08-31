@@ -32,3 +32,13 @@ impl Symbol {
         }
     }
 }
+
+impl FunctionSymbol {
+    pub fn new(name: String, args: Vec<String>, node: Node) -> FunctionSymbol {
+        FunctionSymbol {
+            name,
+            args,
+            node,
+        }
+    }
+}

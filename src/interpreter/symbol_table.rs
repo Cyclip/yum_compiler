@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use super::symbols::Symbol;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SymbolTable {
     pub parent: Option<Box<SymbolTable>>,
     pub symbols: HashMap<String, Symbol>,
@@ -31,6 +31,7 @@ impl SymbolTable {
     /// If the identifier already exists, it will be overwritten
     pub fn set(&mut self, name: String, symbol: Symbol) {
         self.symbols.insert(name, symbol);
+        println!("{:#?}", self);
     }
 
     /// Get the value associated with an identifier
