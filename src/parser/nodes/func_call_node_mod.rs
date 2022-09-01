@@ -23,7 +23,6 @@ impl FuncCallNode {
 impl NodeVisit for FuncCallNode {
     fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         // evaluate arguments into symbols
-        println!("Calling func_node: {:#?}", &self.func_node);
         let mut args: Vec<Symbol> = Vec::new();
 
         for arg in &self.args {

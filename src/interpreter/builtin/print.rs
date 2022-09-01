@@ -14,7 +14,6 @@ use crate::parser::nodes::NodeVisit;
 /// OUTPUT: Hello, world!
 pub fn print_func(symbol_table: &mut SymbolTable, args: &Vec<Node>) -> Result<Symbol, Error> {
     let symbol_args = super::evaluate_args(symbol_table, args)?;
-    println!("\n\n\nFunction called. Symbol table: {:#?}\n\nArgs: {:#?}\n\n\n", symbol_table, symbol_args);
 
     let text = match symbol_args[0].value {
         SymbolType::String(ref text) => text.clone(),
@@ -48,8 +47,8 @@ fn format_string(text: String, args: Vec<String>) -> Result<String, String> {
         return Err(format!("Number of format arguments does not match number of format specifiers in string"));
     };
 
-    let mut split_text_iter = text.split("{}");
-    let mut args_iter = args.iter();
+    let split_text_iter = text.split("{}");
+    let args_iter = args.iter();
 
     let mut final_string = String::new();
 

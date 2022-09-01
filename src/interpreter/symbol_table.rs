@@ -39,7 +39,6 @@ impl<'a> SymbolTable<'a> {
     /// If the identifier already exists, it will be overwritten
     pub fn set(&mut self, name: String, symbol: Symbol) {
         self.symbols.insert(name, symbol);
-        println!("{:#?}", self);
     }
 
     /// Get the value associated with an identifier
