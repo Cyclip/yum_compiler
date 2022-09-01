@@ -50,4 +50,11 @@ impl<'a> SymbolTable<'a> {
             },
         }
     }
+
+    /// For function calls, set arguments to the function symbol table
+    pub fn set_args(&mut self, func_args: &Vec<String>, args: Vec<Symbol>) {
+        for i in func_args.iter().zip(args.iter()) {
+            self.set(i.0.clone(), i.1.clone());
+        }
+    }
 }

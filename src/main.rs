@@ -49,7 +49,7 @@ fn main() {
         }
     };
 
-    // println!("{:#?}", ast);
+    println!("{:#?}", ast);
 
     // run
     match run(ast) {

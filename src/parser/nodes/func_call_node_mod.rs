@@ -31,10 +31,11 @@ impl NodeVisit for FuncCallNode {
         };
 
         // create a new symbol table for the function call
+        // arguments will be set after function node is found
         let mut func_symbol_table = SymbolTable::new(Box::new(&*symbol_table));
         // println!("func_symbol_table: {:?}", func_symbol_table);
 
-        // get function node and evaluate
+        // get function node
         let func_identifier = match self.func_node {
             Node::VarAccessNode(ref var_access_node) => get_name_as_string(var_access_node.identifier.clone())?,
             _ => return Err(Error::new_runtime(
@@ -44,36 +45,45 @@ impl NodeVisit for FuncCallNode {
             ))
         };
 
-        let func_symbol = match symbol_table.get(&func_identifier) {
-            Some(symbol) => {
-                match symbol.value {
-                    SymbolType::Function(func_symbol) => {
-                        let statements_node = match func_symbol.node {
-                            Node::StatementsNode(statements_node) => statements_node,
-                            _ => panic!("Function node is not a StatementsNode")
-                        };
+        // get the function node
+        let func_node = match symbol_table.get(&func_identifier) {
+            Some(symbol) => match symbol.value {
+                SymbolType::Function(func_symbol) => func_symbol,
+                _ => return Err(Error::new_runtime(
+                    ErrorType::TypeError, 
+                    format!("Cannot call non-function {:?}", self.func_node),
+                    &self.func_node.get_position()
+                ))
+            },
+            None => return Err(Error::new_runtime(
+                ErrorType::UndefinedVariable, 
+                format!("Function {} not found", func_identifier),
+                &self.func_node.get_position()
+            ))
+        };
 
-                        // visit all statements until a return statement is found
-                        for statement in statements_node.statements {
-                            match statement {
-                                Node::ReturnNode(ref return_node) => {
-                                    return return_node.visit(&mut func_symbol_table);
-                                },
-                                _ => {
-                                    statement.visit(&mut func_symbol_table)?;
-                                }
-                            }
+        // set arguments in function symbol table
+        func_symbol_table.set_args(&func_node.args, args);
+
+        // evaluate function symbol
+        let func_symbol = match func_node.node {
+            Node::StatementsNode(statements) => {
+                // visit all statements until a return statement is found
+                for statement in statements.statements {
+                    match statement {
+                        Node::ReturnNode(ref return_node) => {
+                            return return_node.visit(&mut func_symbol_table);
+                        },
+                        _ => {
+                            statement.visit(&mut func_symbol_table)?;
                         }
-                    },
-                    _ => return Err(Error::new_runtime(
-                        ErrorType::TypeError, 
-                        format!("Cannot call non-function {:?}", self.func_node),
-                        &self.func_node.get_position()
-                    ))
-                };
+                    }
+                }
+
+                // return none if no return statement
                 Symbol::new(SymbolType::None, self.get_position())
             },
-            None => Symbol::new(SymbolType::None, self.get_position())
+            _ => panic!("Function node must be a StatementsNode")
         };
 
         Ok(func_symbol)
