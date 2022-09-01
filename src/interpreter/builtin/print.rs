@@ -13,7 +13,7 @@ use crate::parser::nodes::NodeVisit;
 /// INPUT: print("{}, {}!", "Hello", "world")
 /// OUTPUT: Hello, world!
 pub fn print_func(symbol_table: &mut SymbolTable, args: &Vec<Node>) -> Result<Symbol, Error> {
-    let symbol_args = super::evaluate_args(args)?;
+    let symbol_args = super::evaluate_args(symbol_table, args)?;
     println!("\n\n\nFunction called. Symbol table: {:#?}\n\nArgs: {:#?}\n\n\n", symbol_table, symbol_args);
 
     let text = match symbol_args[0].value {
@@ -42,10 +42,7 @@ pub fn print_func(symbol_table: &mut SymbolTable, args: &Vec<Node>) -> Result<Sy
     Ok(Symbol::new(SymbolType::None, TokenPosition::internal()))
 }
 
-fn get_position(args: &Vec<Node>) -> TokenPosition {
-    args[0].get_position()
-}
-
+/// Format a string with the given arguments
 fn format_string(text: String, args: Vec<String>) -> Result<String, String> {
     if !same_size(&text, &args) {
         return Err(format!("Number of format arguments does not match number of format specifiers in string"));
@@ -63,6 +60,8 @@ fn format_string(text: String, args: Vec<String>) -> Result<String, String> {
     Ok(final_string)
 }
 
+
+/// Check if the number of format specifiers in the string is the same as the number of arguments
 fn same_size(text: &String, args: &Vec<String>) -> bool {
     let split_text_iter = text.split("{}").count();
     let args_iter = args.len();
