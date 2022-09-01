@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 use super::{symbols::{Symbol, SymbolType, FunctionSymbol}, builtin};
-use crate::{errors::Error, parser::nodes::{Node, ExecuteBuiltinNode}, lexer::tokens::{TokenType, TokenPosition}};
+use crate::{errors::Error, parser::nodes::{Node, ExecuteBuiltinNode}, lexer::tokens::{TokenPosition}};
 
 #[derive(Clone, Debug)]
 pub struct SymbolTable<'a> {

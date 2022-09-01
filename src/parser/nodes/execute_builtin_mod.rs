@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
-use crate::{interpreter::symbol_table::SymbolTable, lexer::tokens::{Keyword, TokenPosition}};
+use crate::{interpreter::symbol_table::SymbolTable, lexer::tokens::{TokenPosition}};
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::{Token, TokenType}, errors::{Error, ErrorType}};
 

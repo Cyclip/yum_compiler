@@ -6,4 +6,7 @@ func incr(x) {
 let a = 3;
 let b = incr(a);
 
+print("a = {}", a);
+print("b = {}", b);
+
 assert b == a + 1;

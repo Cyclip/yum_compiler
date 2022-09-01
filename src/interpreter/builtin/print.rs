@@ -3,7 +3,6 @@ use crate::interpreter::symbols::{Symbol, SymbolType};
 use crate::errors::{Error, ErrorType};
 use crate::lexer::tokens::TokenPosition;
 use crate::parser::nodes::Node;
-use crate::parser::nodes::NodeVisit;
 
 /// Print a formatted string to the console.
 /// Examples:
