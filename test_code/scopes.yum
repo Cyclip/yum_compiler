@@ -1,0 +1,7 @@
+func scope() {
+    let a = 5;
+    return a + 5;
+};
+
+let a = 6;
+let b = scope();

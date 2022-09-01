@@ -8,23 +8,26 @@ use std::collections::HashMap;
 use super::symbols::Symbol;
 
 #[derive(Clone, Debug)]
-pub struct SymbolTable {
-    pub parent: Option<Box<SymbolTable>>,
+pub struct SymbolTable<'a> {
+    pub parent: Option<Box<&'a SymbolTable<'a>>>,
     pub symbols: HashMap<String, Symbol>,
 }
 
-impl SymbolTable {
+impl<'a> SymbolTable<'a> {
     /// Create a new symbol table
-    pub fn new(parent: Option<Box<SymbolTable>>) -> SymbolTable {
+    pub fn new(parent: Box<&'a SymbolTable>) -> SymbolTable<'a> {
         SymbolTable {
-            parent,
+            parent: Some(parent),
             symbols: HashMap::new(),
         }
     }
 
     /// Nicer shortcut for creating a global symbol table
-    pub fn new_global() -> SymbolTable {
-        SymbolTable::new(None)
+    pub fn new_global() -> SymbolTable<'a> {
+        SymbolTable {
+            parent: None,
+            symbols: HashMap::new(),
+        }
     }
 
     /// Insert a new identifier into the symbol table

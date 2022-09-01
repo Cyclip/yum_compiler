@@ -83,7 +83,7 @@ impl Parser {
     fn advance(&mut self) -> Option<Token> {
         self.token_index += 1;
         self.current_token = Parser::try_get_token(&self.tokens, self.token_index);
-        println!("\nAdvanced to: \t\t\t\t{:?}\n", self.current_token);
+        // DEBUG: println!("\nAdvanced to: \t\t\t\t{:?}\n", self.current_token);
         self.get_current_token()
     }
 
@@ -135,7 +135,7 @@ impl Parser {
     /// Expect a token of a given type at the current location.
     /// DOES NOT ADVANCE THE PARSER
     fn expect(&self, token_type: TokenType) -> Result<(), Error> {
-        println!("Expecting {:?} at {:?} ({:?})", token_type, self.get_current_token_err()?.position, self.get_current_token_err()?.value);
+        // DEBUG: println!("Expecting {:?} at {:?} ({:?})", token_type, self.get_current_token_err()?.position, self.get_current_token_err()?.value);
         match self.get_current_token() {
             Some(token) => {
                 if token.value == token_type {
@@ -157,32 +157,32 @@ impl Parser {
 
     /// Statements
     fn gr_statements(&mut self) -> GrammarOutput {
-        println!("Statements\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Statements\t\t\t\t{:?}", self.get_current_token());
         let mut statements: Vec<Node> = Vec::new();
 
         while let Some(current_tok) = self.get_current_token() {
             if [TokenType::EOF, TokenType::RightBrace, TokenType::RightParen, TokenType::RightSquare].contains(&current_tok.value) {
                 break;
             } else {
-                println!("Getting statement from expression {:?}", self.get_current_token());
+                // DEBUG: println!("Getting statement from expression {:?}", self.get_current_token());
                 statements.push(self.gr_statement()?);
 
             }
         };
 
-        println!("Statements completed, returning {:?}", statements);
-        println!("Current token: {:?}", self.get_current_token());
+        // DEBUG: println!("Statements completed, returning {:?}", statements);
+        // DEBUG: println!("Current token: {:?}", self.get_current_token());
 
         Ok(Node::StatementsNode(Box::new(StatementsNode::new(statements))))
     }
 
     fn gr_statement(&mut self) -> GrammarOutput {
-        println!("Statement\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Statement\t\t\t\t{:?}", self.get_current_token());
         let current_tok = self.get_current_token_err()?;
         let statement = match current_tok.value {
             TokenType::Keyword(Keyword::Return) => {
                 // expecting return statement
-                println!("Expecting return statement");
+                // DEBUG: println!("Expecting return statement");
                 self.advance();
                 
                 // next token may be semicolon or expression
@@ -192,13 +192,13 @@ impl Parser {
                         ..
                     } => {
                         // return statement with no expression
-                        println!("Return statement with no expression");
+                        // DEBUG: println!("Return statement with no expression");
                         self.advance();
                         None
                     }
                     _ => {
                         // return statement with expression
-                        println!("Return statement with expression");
+                        // DEBUG: println!("Return statement with expression");
                         Some(self.gr_expr()?)
                     }
                 };
@@ -217,13 +217,13 @@ impl Parser {
 
     /// Expression
     fn gr_expr(&mut self) -> GrammarOutput {
-        println!("Expression\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Expression\t\t\t\t{:?}", self.get_current_token());
         // check if keyword var instead
         let current_token = self.get_current_token().expect("Expected token");
         match current_token.value {
             TokenType::Keyword(Keyword::Let) => {
                 // expecting variable assignment
-                println!("Expecting variable assignment");
+                // DEBUG: println!("Expecting variable assignment");
                 self.advance();
 
                 // ensure the next token is a variable name (identifier)
@@ -252,7 +252,7 @@ impl Parser {
                     }
                 };
 
-                println!("Got identifier: {:?}", var_name_identifier);
+                // DEBUG: println!("Got identifier: {:?}", var_name_identifier);
 
                 // ensure the next token is an equals sign
                 match self.get_current_token_err()?.value {
@@ -260,12 +260,12 @@ impl Parser {
                         // Variable assignment
                         self.advance();
 
-                        println!("Got equals sign");
+                        // DEBUG: println!("Got equals sign");
 
                         // ensure the next token is an expression
                         let expr = self.gr_expr()?;
 
-                        println!("Got expression");
+                        // DEBUG: println!("Got expression");
                         Ok(Node::VarAssignmentNode(Box::new(VarAssignmentNode::new(var_name_identifier, expr))))
                     }
 
@@ -315,7 +315,7 @@ impl Parser {
 
     /// Compare Expression
     fn gr_compare_expr(&mut self) -> GrammarOutput {
-        println!("Compare expression\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Compare expression\t\t\t{:?}", self.get_current_token());
         
         let current_token = self.get_current_token().expect("No token found");
 
@@ -350,7 +350,7 @@ impl Parser {
 
     /// Arithmetic Expression
     fn gr_arithmetic_expr(&mut self) -> GrammarOutput {
-        println!("Arith expression\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Arith expression\t\t\t{:?}", self.get_current_token());
         // find terms separated by operators
         let mut left_node = self.gr_term()?;
 
@@ -370,7 +370,7 @@ impl Parser {
 
     /// Term
     fn gr_term(&mut self) -> GrammarOutput {
-        println!("Term\t\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Term\t\t\t\t\t{:?}", self.get_current_token());
         // find factors separated by operators
 
         let mut left_node = self.gr_factor()?;
@@ -392,7 +392,7 @@ impl Parser {
     /// Factor
     fn gr_factor(&mut self) -> GrammarOutput {
         // get atom
-        println!("Factor\t\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Factor\t\t\t\t\t{:?}", self.get_current_token());
         let mut left_node = self.gr_call()?;
 
         while !self.reached_eof() {
@@ -411,7 +411,7 @@ impl Parser {
 
     /// Call
     fn gr_call(&mut self) -> GrammarOutput {
-        println!("Call\t\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Call\t\t\t\t\t{:?}", self.get_current_token());
         let left_node = self.gr_atom()?;
 
         let current_tok = self.get_current_token_err()?;
@@ -442,7 +442,7 @@ impl Parser {
 
     /// Atom
     fn gr_atom(&mut self) -> GrammarOutput {
-        println!("Atom\t\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Atom\t\t\t\t\t{:?}", self.get_current_token());
         // try to find int/longint/float/double
         // if not found, raise error
 
@@ -531,7 +531,7 @@ impl Parser {
     }
 
     fn gr_list_expr(&mut self) -> GrammarOutput {
-        println!("List\t\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("List\t\t\t\t\t{:?}", self.get_current_token());
         let mut elements = Vec::new();
 
         while self.get_current_token_err()?.value != TokenType::RightSquare {
@@ -552,7 +552,7 @@ impl Parser {
     /// If Expression
     /// Must have advanced past 'if' keyword
     fn gr_if_expr(&mut self) -> GrammarOutput {
-        println!("If expression\t\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("If expression\t\t\t\t{:?}", self.get_current_token());
 
         // cases to consider
         let mut else_case: Option<Node> = None;
@@ -578,16 +578,16 @@ impl Parser {
                     TokenType::Keyword(Keyword::Else) => {
                         self.advance();
 
-                        println!("Found else keyword, advanced to {:?}", self.get_current_token());
+                        // DEBUG: println!("Found else keyword, advanced to {:?}", self.get_current_token());
 
                         // nested if expression
                         if self.get_current_token_err()?.value == TokenType::Keyword(Keyword::If) {
                             self.advance();
-                            println!("Found nested if expression");
+                            // DEBUG: println!("Found nested if expression");
                             else_case = Some(self.gr_if_expr()?);
-                            println!("else_case: {:?}", else_case);
+                            // DEBUG: println!("else_case: {:?}", else_case);
                         } else {
-                            println!("Found else expression");
+                            // DEBUG: println!("Found else expression");
                             // expect curly braces
                             self.expect(TokenType::LeftBrace)?;
                             self.advance();
@@ -645,7 +645,7 @@ impl Parser {
 
         // one or more ", <identifier>"
         while self.get_current_token_err()?.value == TokenType::Comma {
-            println!("Expecting identifier");
+            // DEBUG: println!("Expecting identifier");
             self.advance();
             let current_tok = self.get_current_token_err()?;
 
@@ -673,14 +673,14 @@ impl Parser {
 
         // check if the next char is a right brace, if not expect an expression before
         let body: Option<Node> = if self.get_current_token_err()?.value == TokenType::RightBrace {
-            println!("Expecting empty expressionn");
+            // DEBUG: println!("Expecting empty expressionn");
             None
         } else {
-            println!("Expecting statements");
+            // DEBUG: println!("Expecting statements");
             Some(self.gr_statements()?)
         };
 
-        println!("Body for function: {:?}", body);
+        // DEBUG: println!("Body for function: {:?}", body);
 
         self.expect(TokenType::RightBrace)?;
         self.advance();

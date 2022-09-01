@@ -76,6 +76,17 @@ fn get_name_as_string(identifier: Token) -> Result<String, Error> {
     }
 }
 
+/// Convert a vector of string tokens as strings
+fn string_parameters(parameters: Vec<Token>) -> Vec<String> {
+    let mut strings: Vec<String> = Vec::new();
+
+    for parameter in &parameters {
+        strings.push(get_name_as_string(parameter.clone()).unwrap());
+    }
+
+    strings
+}
+
 impl NodeVisit for Node {
     fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
         match self {

@@ -12,7 +12,7 @@ fn compile(source: String) -> Result<Node, Error> {
     let mut lexer = lexer::Lexer::new(source);
     let tokens = lexer.make_tokens()?;
 
-    println!("Tokens: {:#?}", tokens);
+    // DEBUG: println!("Tokens: {:#?}", tokens);
 
     let mut parser = parser::Parser::new(tokens);
     let ast = parser.parse();

@@ -7,12 +7,12 @@ use symbol_table::SymbolTable;
 
 use crate::{parser::nodes::{Node, NodeVisit}, errors::{Error}};
 
-pub struct Interpreter {
-    pub symbol_table: SymbolTable,
+pub struct Interpreter<'a> {
+    pub symbol_table: SymbolTable<'a>,
 }
 
-impl Interpreter {
-    pub fn new() -> Interpreter {
+impl<'a> Interpreter<'a> {
+    pub fn new() -> Interpreter<'a> {
         Interpreter {
             symbol_table: SymbolTable::new_global(),
         }

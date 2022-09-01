@@ -1,5 +1,6 @@
 #[allow(unused_imports)]
 use super::{Node, NodeVisit};
+use crate::interpreter::symbols::SymbolType;
 #[allow(unused_imports)]
 use crate::{interpreter::symbols::Symbol, lexer::tokens::Token, errors::{Error, ErrorType}};
 
@@ -19,7 +20,10 @@ impl ReturnNode {
 
 impl NodeVisit for ReturnNode {
     fn visit(&self, _symbol_table: &mut crate::interpreter::symbol_table::SymbolTable) -> Result<Symbol, Error> {
-        unimplemented!()
+        match self.value {
+            Some(ref value) => value.visit(_symbol_table),
+            None => Ok(Symbol::new(SymbolType::None, self.get_position()))
+        }
     }
 
     fn get_position(&self) -> crate::lexer::tokens::TokenPosition {
