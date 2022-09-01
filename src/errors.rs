@@ -55,12 +55,20 @@ impl Error {
 
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f, "{:?}: {} at line {}, column {}", 
-            self.error_type, 
-            self.error_message, 
-            self.position.line, 
-            self.position.column,
-        )
+        if self.position.is_internal() {
+            write!(
+                f, "[Internal error] {:?}: {}",
+                self.error_type,
+                self.error_message,
+            )
+        } else {
+            write!(
+                f, "{:?}: {} at line {}, column {}", 
+                self.error_type, 
+                self.error_message, 
+                self.position.line, 
+                self.position.column,
+            )
+        }
     }
 }

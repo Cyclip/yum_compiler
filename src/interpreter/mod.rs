@@ -2,6 +2,7 @@
 
 pub mod symbols;
 pub mod symbol_table;
+pub mod builtin;
 
 use symbol_table::SymbolTable;
 

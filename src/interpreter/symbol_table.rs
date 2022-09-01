@@ -4,8 +4,8 @@
 //! acting as the global symbol table.
 
 use std::collections::HashMap;
-
-use super::symbols::Symbol;
+use super::{symbols::{Symbol, SymbolType, FunctionSymbol}, builtin};
+use crate::{errors::Error, parser::nodes::{Node, ExecuteBuiltinNode}, lexer::tokens::{TokenType, TokenPosition}};
 
 #[derive(Clone, Debug)]
 pub struct SymbolTable<'a> {
@@ -13,6 +13,7 @@ pub struct SymbolTable<'a> {
     pub symbols: HashMap<String, Symbol>,
 }
 
+/// General SymbolTable implementations =============================================================
 impl<'a> SymbolTable<'a> {
     /// Create a new symbol table
     pub fn new(parent: Box<&'a SymbolTable>) -> SymbolTable<'a> {
@@ -24,10 +25,14 @@ impl<'a> SymbolTable<'a> {
 
     /// Nicer shortcut for creating a global symbol table
     pub fn new_global() -> SymbolTable<'a> {
-        SymbolTable {
+        let mut symbol_table = SymbolTable {
             parent: None,
             symbols: HashMap::new(),
-        }
+        };
+
+        symbol_table.add_builtin_functions();
+
+        symbol_table
     }
 
     /// Insert a new identifier into the symbol table
@@ -57,4 +62,35 @@ impl<'a> SymbolTable<'a> {
             self.set(i.0.clone(), i.1.clone());
         }
     }
+}
+
+
+/// Built in functions =============================================================
+impl<'a> SymbolTable<'a> {
+    /// Add a function to the symbol table
+    pub fn add_function(&mut self, name: &str, args: Vec<String>, func: fn(&Vec<Symbol>) -> Result<Symbol, Error>) {
+        self.symbols.insert(
+            name.to_string(),
+            Symbol::new(
+                SymbolType::Function(FunctionSymbol::new(
+                    name.to_string(),
+                    args.clone(),
+                    Node::ExecuteBuiltinNode(Box::new(ExecuteBuiltinNode::new(func, None)))
+                )),
+                TokenPosition::internal()
+            )
+        );
+    }
+
+    /// Add built-in functions to the global symbol table
+    fn add_builtin_functions(&mut self) {
+        // print function
+        self.add_function(
+            "print",
+            vec!["text".to_string(), "arguments".to_string()],
+            |args: &Vec<Symbol>| -> Result<Symbol, Error> { builtin::print_func(args) }
+        );
+    }
+    
+        
 }

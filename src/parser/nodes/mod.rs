@@ -15,6 +15,7 @@ pub mod list_expr_node_mod;
 pub mod statements_node_mod;
 pub mod return_node_mod;
 pub mod assert_node_mod;
+pub mod execute_builtin_mod;
 
 pub use number_node_mod::NumberNode;
 pub use string_node_mod::StringNode;
@@ -30,6 +31,7 @@ pub use list_expr_node_mod::ListExprNode;
 pub use statements_node_mod::StatementsNode;
 pub use return_node_mod::ReturnNode;
 pub use assert_node_mod::AssertNode;
+pub use execute_builtin_mod::ExecuteBuiltinNode;
 
 use crate::{
     errors::{Error, ErrorType}, 
@@ -56,6 +58,7 @@ pub enum Node {
     StatementsNode(Box<StatementsNode>),
     ReturnNode(Box<ReturnNode>),
     AssertNode(Box<AssertNode>),
+    ExecuteBuiltinNode(Box<ExecuteBuiltinNode>),
 }
 
 /// Trait for the node to be able to be visited (evaluated)
@@ -103,6 +106,7 @@ impl NodeVisit for Node {
             Node::ListExprNode(node) => node.visit(symbol_table),
             Node::ReturnNode(node) => node.visit(symbol_table),
             Node::AssertNode(node) => node.visit(symbol_table),
+            Node::ExecuteBuiltinNode(node) => node.visit(symbol_table),
             Node::StatementsNode(_) => panic!("Cannot visit statements node"),
         }
     }
@@ -122,6 +126,7 @@ impl NodeVisit for Node {
             Node::ListExprNode(node) => node.get_position(),
             Node::ReturnNode(node) => node.get_position(),
             Node::AssertNode(node) => node.get_position(),
+            Node::ExecuteBuiltinNode(node) => node.get_position(),
             Node::StatementsNode(_) => panic!("Cannot visit statements node"),
         }
     }

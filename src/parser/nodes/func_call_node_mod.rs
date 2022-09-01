@@ -67,6 +67,13 @@ impl NodeVisit for FuncCallNode {
 
         // evaluate function symbol
         let func_symbol = match func_node.node {
+            // built in
+            Node::ExecuteBuiltinNode(mut execute_builtin_node) => {
+                execute_builtin_node.args = Some(self.args.clone());
+                execute_builtin_node.visit(&mut func_symbol_table)?
+            },
+
+            // custom function
             Node::StatementsNode(statements) => {
                 // visit all statements until a return statement is found
                 for statement in statements.statements {

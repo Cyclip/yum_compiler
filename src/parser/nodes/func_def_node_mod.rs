@@ -1,3 +1,4 @@
+use super::ReturnNode;
 #[allow(unused_imports)]
 use super::{Node, NodeVisit, get_name_as_string, string_parameters};
 use crate::{lexer::tokens::TokenPosition, interpreter::symbols::SymbolType};
@@ -28,7 +29,15 @@ impl NodeVisit for FuncDefNode {
         let identifier_string = get_name_as_string(self.identifier.clone())?;
 
         // set function in symbol table
-        let func_symbol = SymbolType::Function(FunctionSymbol::new(identifier_string.clone(), string_parameters(self.parameters.clone()), self.body.clone().unwrap()));
+        let func_symbol = SymbolType::Function(FunctionSymbol::new(
+            identifier_string.clone(), 
+            string_parameters(self.parameters.clone()), 
+            match self.body {
+                Some(ref node) => node.clone(),
+                None => Node::ReturnNode(Box::new(ReturnNode::new(None)))
+            }
+        ));
+        
         symbol_table.set(identifier_string, Symbol::new(func_symbol, self.identifier.position));
         Ok(Symbol::new(SymbolType::None, self.identifier.position))
     }

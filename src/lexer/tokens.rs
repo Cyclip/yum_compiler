@@ -94,6 +94,17 @@ impl TokenPosition {
             column: position.column,
         }
     }
+
+    pub fn internal() -> TokenPosition {
+        TokenPosition {
+            line: 0,
+            column: 0,
+        }
+    }
+
+    pub fn is_internal(&self) -> bool {
+        self.line == 0 && self.column == 0
+    }
 }
 
 impl std::fmt::Debug for TokenPosition {
