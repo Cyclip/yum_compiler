@@ -46,3 +46,9 @@ impl NodeVisit for FuncDefNode {
         self.identifier.position
     }
 }
+
+impl ToString for FuncDefNode {
+    fn to_string(&self) -> String {
+        format!("FuncDefNode")
+    }
+}

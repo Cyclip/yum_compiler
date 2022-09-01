@@ -9,18 +9,19 @@ use crate::{interpreter::symbols::Symbol, lexer::tokens::{Token, TokenType}, err
 /// Execute rust-based built-in functions
 #[derive(Clone)]
 pub struct ExecuteBuiltinNode {
-    pub func: fn(&Vec<Symbol>) -> Result<Symbol, Error>,
+    pub func: &'static dyn Fn(&mut SymbolTable, &Vec<Node>) -> Result<Symbol, Error>,
     pub args: Option<Vec<Node>>,
 }
 
 impl ExecuteBuiltinNode {
-    pub fn new(func: fn(&Vec<Symbol>) -> Result<Symbol, Error>, args: Option<Vec<Node>>) -> ExecuteBuiltinNode {
+    pub fn new(func: &'static dyn Fn(&mut SymbolTable, &Vec<Node>) -> Result<Symbol, Error>, args: Option<Vec<Node>>) -> ExecuteBuiltinNode {
         ExecuteBuiltinNode {
             func,
             args,
         }
     }
 
+    /// Evaluate all argument nodes into a symbol vector
     fn evaluate_arguments(&self, symbol_table: &mut SymbolTable) -> Result<Vec<Symbol>, Error> {
         let mut args: Vec<Symbol> = Vec::new();
 
@@ -34,8 +35,7 @@ impl ExecuteBuiltinNode {
 
 impl NodeVisit for ExecuteBuiltinNode {
     fn visit(&self, symbol_table: &mut SymbolTable) -> Result<Symbol, Error> {
-        let args = self.evaluate_arguments(symbol_table)?;
-        (self.func)(&args)
+        (self.func)(symbol_table, &self.args.as_ref().expect("Arguments are not defined"))
     }
 
     fn get_position(&self) -> TokenPosition {
@@ -46,5 +46,11 @@ impl NodeVisit for ExecuteBuiltinNode {
 impl Debug for ExecuteBuiltinNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "ExecuteBuiltinNode")
+    }
+}
+
+impl ToString for ExecuteBuiltinNode {
+    fn to_string(&self) -> String {
+        "ExecuteBuiltinNode".to_string()
     }
 }

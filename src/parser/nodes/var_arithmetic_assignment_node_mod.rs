@@ -46,3 +46,12 @@ impl NodeVisit for VarArithmeticAssignmentNode {
         Ok(Symbol::new(SymbolType::None, self.get_position()))
     }
 }
+
+impl ToString for VarArithmeticAssignmentNode {
+    fn to_string(&self) -> String {
+        format!(
+            "VarArithmeticAssignmentNode: {:?} {:?} {:?}",
+            self.identifier.value, self.op_token.value, self.value.to_string()
+        )
+    }
+}

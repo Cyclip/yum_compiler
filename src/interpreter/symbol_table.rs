@@ -68,7 +68,7 @@ impl<'a> SymbolTable<'a> {
 /// Built in functions =============================================================
 impl<'a> SymbolTable<'a> {
     /// Add a function to the symbol table
-    pub fn add_function(&mut self, name: &str, args: Vec<String>, func: fn(&Vec<Symbol>) -> Result<Symbol, Error>) {
+    pub fn add_function(&mut self, name: &str, args: Vec<String>, func: &'static dyn Fn(&mut SymbolTable, &Vec<Node>) -> Result<Symbol, Error>) {
         self.symbols.insert(
             name.to_string(),
             Symbol::new(
@@ -88,7 +88,7 @@ impl<'a> SymbolTable<'a> {
         self.add_function(
             "print",
             vec!["text".to_string(), "arguments".to_string()],
-            |args: &Vec<Symbol>| -> Result<Symbol, Error> { builtin::print_func(args) }
+            &builtin::print::print_func
         );
     }
     

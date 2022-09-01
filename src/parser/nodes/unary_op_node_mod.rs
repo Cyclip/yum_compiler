@@ -42,3 +42,9 @@ impl NodeVisit for UnaryOpNode {
         self.token.position
     }
 }
+
+impl ToString for UnaryOpNode {
+    fn to_string(&self) -> String {
+        format!("{} {}", self.token.value, self.right.to_string())
+    }
+}

@@ -34,3 +34,9 @@ impl NodeVisit for VarAssignmentNode {
         Ok(Symbol::new(SymbolType::None, self.get_position()))
     }
 }
+
+impl ToString for VarAssignmentNode {
+    fn to_string(&self) -> String {
+        format!("VarAssignmentNode: {:?}", self.identifier.value)
+    }
+}

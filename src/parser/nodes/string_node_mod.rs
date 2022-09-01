@@ -32,3 +32,9 @@ impl NodeVisit for StringNode {
         self.token.position
     }
 }
+
+impl ToString for StringNode {
+    fn to_string(&self) -> String {
+        format!("{}", self.token.value)
+    }
+}

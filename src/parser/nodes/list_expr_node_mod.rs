@@ -26,3 +26,9 @@ impl NodeVisit for ListExprNode {
         self.elements[0].get_position()
     }
 }
+
+impl ToString for ListExprNode {
+    fn to_string(&self) -> String {
+        format!("ListExprNode")
+    }
+}

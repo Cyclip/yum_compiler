@@ -131,3 +131,27 @@ impl NodeVisit for Node {
         }
     }
 }
+
+impl std::fmt::Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let text = match self {
+            Node::NumberNode(node) => node.to_string(),
+            Node::StringNode(node) => node.to_string(),
+            Node::BinOpNode(node) => node.to_string(),
+            Node::UnaryOpNode(node) => node.to_string(),
+            Node::VarAssignmentNode(node) => node.to_string(),
+            Node::VarArithmeticAssignmentNode(node) => node.to_string(),
+            Node::VarAccessNode(node) => node.to_string(),
+            Node::IfExprNode(node) => node.to_string(),
+            Node::FuncDefNode(node) => node.to_string(),
+            Node::FuncCallNode(node) => node.to_string(),
+            Node::ListExprNode(node) => node.to_string(),
+            Node::ReturnNode(node) => node.to_string(),
+            Node::AssertNode(node) => node.to_string(),
+            Node::ExecuteBuiltinNode(node) => node.to_string(),
+            Node::StatementsNode(_) => panic!("Cannot stringify statements node"),
+        };
+
+        write!(f, "{}", text)
+    }
+}

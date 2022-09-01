@@ -30,3 +30,9 @@ impl NodeVisit for ReturnNode {
         self.value.as_ref().unwrap().get_position()
     }
 }
+
+impl ToString for ReturnNode {
+    fn to_string(&self) -> String {
+        format!("ReturnNode")
+    }
+}

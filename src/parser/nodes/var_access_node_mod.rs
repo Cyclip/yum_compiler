@@ -31,3 +31,9 @@ impl NodeVisit for VarAccessNode {
         self.identifier.position
     }
 }
+
+impl ToString for VarAccessNode {
+    fn to_string(&self) -> String {
+        format!("VarAccessNode: {:?}", self.identifier.value)
+    }
+}

@@ -33,3 +33,9 @@ impl NodeVisit for NumberNode {
         self.token.position
     }
 }
+
+impl ToString for NumberNode {
+    fn to_string(&self) -> String {
+        format!("{}", self.token.value)
+    }
+}

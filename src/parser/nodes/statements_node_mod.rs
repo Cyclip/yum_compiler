@@ -16,3 +16,8 @@ impl StatementsNode {
     }
 }
 
+impl ToString for StatementsNode {
+    fn to_string(&self) -> String {
+        format!("StatementsNode")
+    }
+}

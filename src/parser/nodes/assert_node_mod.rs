@@ -47,3 +47,9 @@ impl NodeVisit for AssertNode {
         self.condition.get_position()
     }
 }
+
+impl ToString for AssertNode {
+    fn to_string(&self) -> String {
+        format!("assert({})", self.condition.to_string())
+    }
+}

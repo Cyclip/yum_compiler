@@ -62,6 +62,15 @@ impl NodeVisit for FuncCallNode {
             ))
         };
 
+        // ensure the right number of arguments are passed
+        if func_node.args.len() != args.len() {
+            return Err(Error::new_runtime(
+                ErrorType::TypeError, 
+                format!("Expected {} arguments, got {}", func_node.args.len(), args.len()),
+                &self.func_node.get_position()
+            ))
+        }
+
         // set arguments in function symbol table
         func_symbol_table.set_args(&func_node.args, args);
 
@@ -102,3 +111,14 @@ impl NodeVisit for FuncCallNode {
     }
 }
 
+impl ToString for FuncCallNode {
+    fn to_string(&self) -> String {
+        let mut args: Vec<String> = Vec::new();
+
+        for arg in &self.args {
+            args.push(arg.to_string());
+        };
+
+        format!("{}({})", self.func_node.to_string(), args.join(", "))
+    }
+}

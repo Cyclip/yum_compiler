@@ -48,3 +48,21 @@ impl NodeVisit for IfExprNode {
         self.condition.get_position()
     }
 }
+
+impl ToString for IfExprNode {
+    fn to_string(&self) -> String {
+        match self.if_false.clone() {
+            Some(if_false) => format!(
+                "if {} {{ {} }} else {{ {} }}",
+                self.condition.to_string(),
+                self.if_true.to_string(),
+                if_false.to_string()
+            ),
+            None => format!(
+                "if {} {{ {} }}",
+                self.condition.to_string(),
+                self.if_true.to_string()
+            ),
+        }
+    }
+}

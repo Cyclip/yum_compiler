@@ -56,3 +56,9 @@ impl NodeVisit for BinOpNode {
         self.op_token.position
     }
 }
+
+impl ToString for BinOpNode {
+    fn to_string(&self) -> String {
+        format!("({} {} {})", self.left_node.to_string(), self.op_token.to_string(), self.right_node.to_string())
+    }
+}
