@@ -13,7 +13,7 @@ impl Symbol {
             (SymbolType::Float(a), SymbolType::Integer(b)) => Ok(Symbol::new(SymbolType::Integer(bool_to_int(a >= b as f32)), self.position)),
             _ => Err(Error::new_runtime(
                 ErrorType::TypeError, 
-                format!("Cannot add {:?} and {:?}", self.value, other.value),
+                format!("Cannot apply >= {:?} and {:?}", self.value, other.value),
                 &self.position
             ))
         }

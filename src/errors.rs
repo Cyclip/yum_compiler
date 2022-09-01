@@ -23,6 +23,7 @@ pub enum ErrorType {
     TypeError,
     UndefinedVariable,
     ArgumentError,
+    IOError,
 }
 
 impl Error {

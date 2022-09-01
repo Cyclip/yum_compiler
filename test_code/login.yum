@@ -1,0 +1,8 @@
+func check(username, password) {
+    return (username == "admin") and (password == "123");
+};
+
+let username = input("Username: ");
+let password = input("Password: ");
+
+assert username == "admin" and password == "123";

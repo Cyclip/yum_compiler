@@ -89,6 +89,13 @@ impl<'a> SymbolTable<'a> {
             vec!["text".to_string(), "arguments".to_string()],
             &builtin::print::print_func
         );
+
+        // input function
+        self.add_function(
+            "input",
+            vec!["prefix".to_string()],
+            &builtin::input::input_func
+        );
     }
     
         

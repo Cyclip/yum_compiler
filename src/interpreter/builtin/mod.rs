@@ -4,6 +4,7 @@ use crate::errors::Error;
 use crate::parser::nodes::NodeVisit;
 
 pub mod print;
+pub mod input;
 
 fn evaluate_args(symbol_table: &mut SymbolTable, args: &Vec<Node>) -> Result<Vec<Symbol>, Error> {
     let mut symbol_args = Vec::new();
