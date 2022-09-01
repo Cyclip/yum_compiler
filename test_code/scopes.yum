@@ -5,3 +5,5 @@ func scope() {
 
 let a = 6;
 let b = scope();
+print("a: {} (should be 6)", a);
+print("b: {} (should be 10)", b);

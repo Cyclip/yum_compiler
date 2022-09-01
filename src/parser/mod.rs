@@ -614,7 +614,7 @@ impl Parser {
 
     /// Function Definition
     fn gr_func_def(&mut self) -> GrammarOutput {
-        println!("Function definition\t\t\t{:?}", self.get_current_token());
+        // DEBUG: println!("Function definition\t\t\t{:?}", self.get_current_token());
         // expect an identifier
         let current_tok = self.get_current_token_err()?;
         let identifier = match current_tok.value {
